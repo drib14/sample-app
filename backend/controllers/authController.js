@@ -1,6 +1,7 @@
 const User = require('../models/User');
 const Otp = require('../models/Otp');
 const sendEmail = require('../utils/sendEmail');
+const { verificationCodeTemplate, welcomeTemplate } = require('../utils/emailTemplates');
 const jwt = require('jsonwebtoken');
 
 const generateOTP = () => {
@@ -25,7 +26,8 @@ const registerInit = async (req, res) => {
 
     await Otp.create({ email, otp, userData });
 
-    await sendEmail(email, 'Maki Registration Verification', `Your verification code is: ${otp}`);
+    const htmlContent = verificationCodeTemplate(otp, 'register');
+    await sendEmail(email, 'Maki Registration Verification', `Your verification code is: ${otp}`, htmlContent);
 
     res.status(200).json({ message: 'Verification code sent to email' });
   } catch (error) {
@@ -47,6 +49,10 @@ const registerVerify = async (req, res) => {
 
     const token = jwt.sign({ id: newUser._id }, process.env.JWT_SECRET, { expiresIn: '1d' });
 
+    // Send Welcome Email
+    const htmlContent = welcomeTemplate(newUser.firstName);
+    await sendEmail(email, 'Welcome to Maki!', `Hi ${newUser.firstName}, welcome to Maki!`, htmlContent);
+
     res.status(201).json({ token, user: newUser });
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -66,7 +72,8 @@ const loginInit = async (req, res) => {
     await Otp.deleteMany({ email });
     await Otp.create({ email, otp });
 
-    await sendEmail(email, 'Maki Login Verification', `Your login verification code is: ${otp}`);
+    const htmlContent = verificationCodeTemplate(otp, 'login');
+    await sendEmail(email, 'Maki Login Verification', `Your login verification code is: ${otp}`, htmlContent);
 
     res.status(200).json({ message: 'Verification code sent to email' });
   } catch (error) {
