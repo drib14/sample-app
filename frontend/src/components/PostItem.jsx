@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { AnimatePresence } from 'framer-motion';
 import { formatDistanceToNow } from 'date-fns';
 import { MessageCircle, Image as ImageIcon } from 'lucide-react';
 import Avatar from './Avatar';
