@@ -8,6 +8,7 @@ const userSchema = new mongoose.Schema({
   dob: { type: Date, required: true },
   address: { type: String, required: true },
   username: { type: String, required: true, unique: true },
+  profilePicture: { type: String, default: null } // Optional, null falls back to initials
 }, { timestamps: true });
 
 module.exports = mongoose.model('User', userSchema);

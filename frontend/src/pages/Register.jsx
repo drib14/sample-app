@@ -53,11 +53,12 @@ const Register = () => {
 
   const prevStep = () => setStep(step - 1);
 
-  // Address Auto-complete using OpenStreetMap Nominatim
+  // Address Auto-complete using LocationIQ
   useEffect(() => {
     const delayDebounceFn = setTimeout(() => {
       if (addressQuery.length > 2) {
-        axios.get(`https://nominatim.openstreetmap.org/search?format=json&q=${addressQuery}&limit=5`)
+        const token = import.meta.env.VITE_LOCATIONIQ_ACCESS_TOKEN;
+        axios.get(`https://us1.locationiq.com/v1/autocomplete.php?key=${token}&q=${addressQuery}&limit=5&format=json`)
           .then(res => setAddressSuggestions(res.data))
           .catch(err => console.error(err));
       } else {
