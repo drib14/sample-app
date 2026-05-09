@@ -14,20 +14,36 @@ const PORT = process.env.PORT || 5000;
 // Security Middlewares
 app.use(helmet());
 app.use(cors());
-app.use(express.json({ limit: '10kb' })); // Limit body payload to 10kb to prevent DOS
-app.use(mongoSanitize());
+app.use(express.json({ limit: '10kb' }));
+
+// Fixed Mongo Sanitize Middleware
+app.use((req, res, next) => {
+  if (req.body) {
+    mongoSanitize.sanitize(req.body);
+  }
+
+  if (req.params) {
+    mongoSanitize.sanitize(req.params);
+  }
+
+  next();
+});
 
 // Apply general API limiter to all /api routes
 app.use('/api', apiLimiter);
 
 // Database Connection
-const MONGO_URI = process.env.MONGO_URI || "mongodb://127.0.0.1:27017/maki";
+const MONGO_URI =
+  process.env.MONGO_URI || 'mongodb://127.0.0.1:27017/maki';
 
-mongoose.connect(MONGO_URI, {
-  serverSelectionTimeoutMS: 30000,
-})
-.then(() => console.log('MongoDB connected'))
-.catch((err) => console.log('MongoDB connection error:', err));
+mongoose
+  .connect(MONGO_URI, {
+    serverSelectionTimeoutMS: 30000,
+  })
+  .then(() => console.log('MongoDB connected'))
+  .catch((err) =>
+    console.log('MongoDB connection error:', err)
+  );
 
 // Routes
 const authRoutes = require('./routes/authRoutes');
@@ -40,6 +56,7 @@ app.use('/api/posts', postRoutes);
 app.use('/api/comments', commentRoutes);
 app.use('/api/users', userRoutes);
 
+// Root Route
 app.get('/', (req, res) => {
   res.send('Maki API is secure and running');
 });
@@ -47,11 +64,15 @@ app.get('/', (req, res) => {
 // Generic Error Handling Middleware
 app.use((err, req, res, next) => {
   console.error(err.stack);
+
   res.status(err.status || 500).json({
-    message: err.message || 'An unexpected error occurred on the server.',
+    message:
+      err.message ||
+      'An unexpected error occurred on the server.',
   });
 });
 
+// Start Server
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
 });
