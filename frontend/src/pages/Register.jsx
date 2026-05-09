@@ -116,12 +116,6 @@ const Register = () => {
         <h2 className="mt-6 text-center text-3xl font-extrabold text-brown-900">
           Create Maki Account
         </h2>
-        <p className="mt-2 text-center text-sm text-brown-600">
-          Already have an account?{' '}
-          <Link to="/login" className="font-medium text-brown-500 hover:text-brown-700">
-            Sign in
-          </Link>
-        </p>
 
         {/* Progress Bar */}
         <div className="mt-6 flex justify-center gap-2">
@@ -318,24 +312,37 @@ const Register = () => {
           {error && <p className="text-red-500 text-sm text-center mt-4">{error}</p>}
 
           {/* Navigation Buttons */}
-          <div className="mt-8 flex justify-between gap-4">
-            {step > 1 && step < 4 && (
-              <button
-                onClick={prevStep}
-                className="w-full flex justify-center py-3 px-4 border border-brown-300 rounded-md shadow-sm text-sm font-medium text-brown-700 bg-white hover:bg-brown-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-brown-500 transition-colors"
-              >
-                Back
-              </button>
-            )}
+          <div className="mt-8 flex flex-col gap-4">
+            <div className="flex justify-between gap-4 w-full">
+              {step > 1 && step < 4 && (
+                <button
+                  onClick={prevStep}
+                  className="w-full flex justify-center py-3 px-4 border border-brown-300 rounded-md shadow-sm text-sm font-medium text-brown-700 bg-white hover:bg-brown-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-brown-500 transition-colors"
+                >
+                  Back
+                </button>
+              )}
 
-            {step < 4 && (
-              <button
-                onClick={nextStep}
-                disabled={loading}
-                className="w-full flex justify-center py-3 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-brown-600 hover:bg-brown-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-brown-500 disabled:opacity-50 transition-colors"
-              >
-                {loading ? 'Processing...' : (step === 3 ? 'Send Verification Code' : 'Next Step')}
-              </button>
+              {step < 4 && (
+                <button
+                  onClick={nextStep}
+                  disabled={loading}
+                  className="w-full flex justify-center py-3 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-brown-600 hover:bg-brown-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-brown-500 disabled:opacity-50 transition-colors"
+                >
+                  {loading ? 'Processing...' : (step === 3 ? 'Send Verification Code' : 'Next Step')}
+                </button>
+              )}
+            </div>
+
+            {step === 1 && (
+              <div className="text-center mt-2">
+                <p className="text-sm text-brown-600">
+                  Already have an account?{' '}
+                  <Link to="/login" className="font-medium text-brown-600 hover:text-brown-800 underline">
+                    Sign in here
+                  </Link>
+                </p>
+              </div>
             )}
           </div>
         </div>

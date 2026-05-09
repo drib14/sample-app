@@ -57,12 +57,6 @@ const Login = () => {
         <h2 className="mt-6 text-center text-3xl font-extrabold text-brown-900">
           Sign in to Maki
         </h2>
-        <p className="mt-2 text-center text-sm text-brown-600">
-          Or{' '}
-          <Link to="/register" className="font-medium text-brown-500 hover:text-brown-700">
-            create a new account
-          </Link>
-        </p>
       </div>
 
       <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
@@ -108,6 +102,15 @@ const Login = () => {
                   >
                     {loading ? 'Sending code...' : 'Continue with Email'}
                   </button>
+                </div>
+
+                <div className="mt-4 text-center">
+                  <p className="text-sm text-brown-600">
+                    Don't have an account?{' '}
+                    <Link to="/register" className="font-medium text-brown-600 hover:text-brown-800 underline">
+                      Create one here
+                    </Link>
+                  </p>
                 </div>
               </motion.form>
             )}
