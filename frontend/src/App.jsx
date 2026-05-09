@@ -5,6 +5,7 @@ import Register from './pages/Register';
 import Login from './pages/Login';
 import Locked from './pages/Locked';
 import Dashboard from './pages/Dashboard';
+import Profile from './pages/Profile';
 
 function App() {
   return (
@@ -34,6 +35,7 @@ function App() {
           <Route path="/login" element={<Login />} />
           <Route path="/locked" element={<Locked />} />
           <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/profile/:username" element={<Profile />} />
           <Route path="/" element={<Login />} />
         </Routes>
       </Router>

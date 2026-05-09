@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { formatDistanceToNow } from 'date-fns';
 import { MessageCircle, Send, Check, X } from 'lucide-react';
 import { motion, AnimatePresence } from "framer-motion";
+import { Link } from 'react-router-dom';
 import Avatar from './Avatar';
 import MediaCarousel from './MediaCarousel';
 import ReactionPicker from './ReactionPicker';
@@ -10,11 +11,14 @@ import GifPicker from './GifPicker';
 import DropdownMenu from './DropdownMenu';
 import ReactionsModal from './ReactionsModal';
 import ConfirmModal from './ConfirmModal';
+import RichText from './RichText';
+import MentionsTextarea from './MentionsTextarea';
 import api from '../utils/api';
 import { toast } from 'react-toastify';
 
-const PostItem = ({ post, currentUser, onPostDeleted }) => {
-  const [reactions, setReactions] = useState(post.reactions || []);
+const PostItem = ({ post: initialPost, currentUser, onPostDeleted }) => {
+  const [post, setPost] = useState(initialPost);
+  const [reactions, setReactions] = useState(initialPost.reactions || []);
   const [comments, setComments] = useState([]);
   const [showComments, setShowComments] = useState(false);
   const [commentText, setCommentText] = useState('');
@@ -24,8 +28,8 @@ const PostItem = ({ post, currentUser, onPostDeleted }) => {
 
   // Edit state
   const [isEditing, setIsEditing] = useState(false);
-  const [editContent, setEditContent] = useState(post.content || '');
-  const [currentContent, setCurrentContent] = useState(post.content || '');
+  const [editContent, setEditContent] = useState(initialPost.content || '');
+  const [currentContent, setCurrentContent] = useState(initialPost.content || '');
 
   // Modals state
   const [showReactionsModal, setShowReactionsModal] = useState(false);
@@ -116,6 +120,17 @@ const PostItem = ({ post, currentUser, onPostDeleted }) => {
     setComments(comments.filter(c => c._id !== commentId && c.parentComment !== commentId));
   };
 
+  const handlePollVote = async (optionId) => {
+    try {
+      const res = await api.post(`/posts/${post._id}/poll/vote`, { optionId }, {
+        headers: { Authorization: `Bearer ${localStorage.getItem('makiToken')}` }
+      });
+      setPost({ ...post, poll: res.data });
+    } catch (err) {
+      toast.error('Failed to vote');
+    }
+  };
+
   const reactionCounts = reactions.reduce((acc, r) => {
     acc[r.emoji] = (acc[r.emoji] || 0) + 1;
     return acc;
@@ -123,7 +138,6 @@ const PostItem = ({ post, currentUser, onPostDeleted }) => {
 
   const topLevelComments = comments.filter(c => !c.parentComment);
 
-  // Recursive function to render replies
   const renderReplies = (parentId, depth = 1) => {
     const replies = comments.filter(c => c.parentComment === parentId);
     if (replies.length === 0) return null;
@@ -147,16 +161,46 @@ const PostItem = ({ post, currentUser, onPostDeleted }) => {
     );
   };
 
+  // Poll calculations
+  const totalVotes = post.poll ? post.poll.options.reduce((acc, opt) => acc + opt.votes.length, 0) : 0;
+  const userVotedOption = post.poll ? post.poll.options.find(opt => opt.votes.includes(currentUser._id)) : null;
+
   return (
     <div className="bg-white rounded-2xl shadow-sm border border-brown-100 p-4 sm:p-6 mb-6 relative">
+      {/* Context Header (Feeling, Tags, Location) */}
+      {(post.feeling || (post.tags && post.tags.length > 0) || post.location) && (
+        <div className="flex flex-wrap gap-x-1 gap-y-1 items-center text-sm text-brown-600 mb-3 pb-3 border-b border-brown-50">
+          <Link to={`/profile/${post.author.username}`} className="font-semibold text-brown-800 hover:underline">{post.author.firstName}</Link>
+          <span>is</span>
+          {post.feeling && <span className="font-semibold text-brown-800">feeling {post.feeling}</span>}
+          {post.tags && post.tags.length > 0 && (
+            <span>
+              with {' '}
+              {post.tags.map((tag, i) => (
+                <span key={tag._id}>
+                  <Link to={`/profile/${tag.username}`} className="font-semibold text-brown-800 hover:underline">{tag.firstName}</Link>
+                  {i < post.tags.length - 1 ? ', ' : ''}
+                </span>
+              ))}
+            </span>
+          )}
+          {post.location && (
+            <span>
+              at <span className="font-semibold text-brown-800">{post.location}</span>
+            </span>
+          )}
+        </div>
+      )}
+
       {/* Post Header */}
       <div className="flex items-start justify-between mb-4">
         <div className="flex items-center gap-3">
-          <Avatar user={post.author} />
+          <Link to={`/profile/${post.author.username}`} className="shrink-0 hover:opacity-80 transition-opacity">
+            <Avatar user={post.author} />
+          </Link>
           <div>
             <h3 className="font-bold text-brown-900 flex items-center gap-2">
-              {post.author.firstName} {post.author.lastName}
-              <span className="text-sm font-normal text-brown-400">@{post.author.username}</span>
+              <Link to={`/profile/${post.author.username}`} className="hover:underline">{post.author.firstName} {post.author.lastName}</Link>
             </h3>
             <p className="text-xs text-brown-400">
               {formatDistanceToNow(new Date(post.createdAt), { addSuffix: true })}
@@ -165,6 +209,7 @@ const PostItem = ({ post, currentUser, onPostDeleted }) => {
         </div>
         <DropdownMenu
           isAuthor={isAuthor}
+          username={post.author.username}
           onEdit={() => setIsEditing(true)}
           onDelete={() => setShowDeleteModal(true)}
         />
@@ -174,9 +219,9 @@ const PostItem = ({ post, currentUser, onPostDeleted }) => {
       <div className="mb-4">
         {isEditing ? (
           <div className="w-full bg-brown-50 border border-brown-200 rounded-xl p-3 flex flex-col gap-2 mb-3">
-            <textarea
+            <MentionsTextarea
               value={editContent}
-              onChange={(e) => setEditContent(e.target.value)}
+              onChange={setEditContent}
               className="w-full resize-none outline-none text-brown-900 bg-transparent custom-scrollbar"
               rows="3"
             />
@@ -190,9 +235,41 @@ const PostItem = ({ post, currentUser, onPostDeleted }) => {
             </div>
           </div>
         ) : (
-          currentContent && <p className="text-brown-800 whitespace-pre-wrap leading-relaxed">{currentContent}</p>
+          currentContent && <RichText text={currentContent} />
         )}
+
         <MediaCarousel media={post.media} />
+
+        {/* Poll UI */}
+        {post.poll && post.poll.options && (
+          <div className="mt-4 p-4 border border-brown-200 rounded-xl bg-brown-50/50">
+            <h4 className="font-bold text-brown-900 mb-3">{post.poll.question}</h4>
+            <div className="space-y-2">
+              {post.poll.options.map(opt => {
+                const percentage = totalVotes === 0 ? 0 : Math.round((opt.votes.length / totalVotes) * 100);
+                const isSelected = userVotedOption && userVotedOption._id === opt._id;
+
+                return (
+                  <button
+                    key={opt._id}
+                    onClick={() => handlePollVote(opt._id)}
+                    className={`relative w-full text-left overflow-hidden rounded-lg border transition-colors ${isSelected ? 'border-brown-500' : 'border-brown-200 hover:border-brown-300'}`}
+                  >
+                    <div
+                      className={`absolute top-0 left-0 h-full transition-all duration-500 ${isSelected ? 'bg-brown-200' : 'bg-brown-100'}`}
+                      style={{ width: `${percentage}%` }}
+                    />
+                    <div className="relative z-10 px-4 py-2 flex justify-between items-center text-sm font-medium text-brown-900">
+                      <span>{opt.text}</span>
+                      <span>{percentage}%</span>
+                    </div>
+                  </button>
+                );
+              })}
+            </div>
+            <p className="text-xs text-brown-500 mt-2 text-right">{totalVotes} votes</p>
+          </div>
+        )}
       </div>
 
       {/* Reactions Display */}
@@ -256,10 +333,10 @@ const PostItem = ({ post, currentUser, onPostDeleted }) => {
             <div className="flex items-end gap-3 relative">
               <Avatar user={currentUser} size="sm" />
               <div className="flex-1 relative flex items-center bg-brown-50 border border-transparent focus-within:border-brown-200 rounded-xl px-2 py-1 transition-colors">
-                <textarea
+                <MentionsTextarea
                   value={commentText}
-                  onChange={(e) => setCommentText(e.target.value)}
-                  placeholder={replyingTo ? "Write a reply..." : "Write a comment..."}
+                  onChange={setCommentText}
+                  placeholder={replyingTo ? "Write a reply... Use @ to mention" : "Write a comment... Use @ to mention"}
                   className="w-full bg-transparent px-2 py-2 text-brown-900 resize-none outline-none text-sm custom-scrollbar"
                   rows="1"
                   onKeyDown={(e) => {

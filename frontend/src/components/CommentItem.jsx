@@ -1,11 +1,14 @@
 import React, { useState } from 'react';
 import { formatDistanceToNow } from 'date-fns';
 import { MessageSquare, Check, X } from 'lucide-react';
+import { Link } from 'react-router-dom';
 import Avatar from './Avatar';
 import ReactionPicker from './ReactionPicker';
 import DropdownMenu from './DropdownMenu';
 import ReactionsModal from './ReactionsModal';
 import ConfirmModal from './ConfirmModal';
+import RichText from './RichText';
+import MentionsTextarea from './MentionsTextarea';
 import api from '../utils/api';
 import { toast } from 'react-toastify';
 
@@ -65,14 +68,16 @@ const CommentItem = ({ comment, currentUser, onReplyClick, onCommentDeleted }) =
 
   return (
     <div className="flex gap-3 mb-4 group relative">
-      <Avatar user={comment.author} size="sm" />
+      <Link to={`/profile/${comment.author.username}`} className="shrink-0 hover:opacity-80 transition-opacity">
+        <Avatar user={comment.author} size="sm" />
+      </Link>
       <div className="flex-1 max-w-[calc(100%-2.5rem)]">
         <div className="flex items-start justify-between gap-2">
           {isEditing ? (
             <div className="w-full bg-white border border-brown-200 rounded-xl p-2 flex flex-col gap-2">
-              <textarea
+              <MentionsTextarea
                 value={editContent}
-                onChange={(e) => setEditContent(e.target.value)}
+                onChange={setEditContent}
                 className="w-full resize-none outline-none text-sm text-brown-900 bg-transparent custom-scrollbar"
                 rows="2"
               />
@@ -88,9 +93,9 @@ const CommentItem = ({ comment, currentUser, onReplyClick, onCommentDeleted }) =
           ) : (
             <div className="bg-brown-50 rounded-2xl px-4 py-2 inline-block">
               <p className="font-semibold text-sm text-brown-900">
-                {comment.author.firstName} {comment.author.lastName}
+                <Link to={`/profile/${comment.author.username}`} className="hover:underline">{comment.author.firstName} {comment.author.lastName}</Link>
               </p>
-              {currentContent && <p className="text-sm text-brown-800 mt-1 whitespace-pre-wrap">{currentContent}</p>}
+              {currentContent && <p className="text-sm mt-1 whitespace-pre-wrap"><RichText text={currentContent} /></p>}
               {comment.gifUrl && (
                 <img src={comment.gifUrl} alt="GIF comment" className="mt-2 rounded-lg max-w-xs h-auto max-h-48 object-contain" />
               )}
@@ -101,6 +106,7 @@ const CommentItem = ({ comment, currentUser, onReplyClick, onCommentDeleted }) =
             <div className="opacity-0 group-hover:opacity-100 transition-opacity">
               <DropdownMenu
                 isAuthor={isAuthor}
+                username={comment.author.username}
                 onEdit={() => setIsEditing(true)}
                 onDelete={() => setShowDeleteModal(true)}
               />
