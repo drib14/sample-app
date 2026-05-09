@@ -19,11 +19,10 @@ const createComment = async (req, res) => {
 
     await newComment.save();
 
-    // Add to post comments array if it's a top-level comment (optional, or just query by post ID later)
-    // To keep it simple, we won't push to post.comments if we fetch comments separately.
-    // Let's fetch comments separately to keep Post documents small.
+    const populatedComment = await Comment.findById(newComment._id)
+      .populate('author', 'firstName lastName username profilePicture')
+      .populate('reactions.user', 'firstName lastName profilePicture username');
 
-    const populatedComment = await Comment.findById(newComment._id).populate('author', 'firstName lastName username profilePicture');
     res.status(201).json(populatedComment);
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -35,8 +34,55 @@ const getCommentsByPost = async (req, res) => {
     const { postId } = req.params;
     const comments = await Comment.find({ post: postId })
       .populate('author', 'firstName lastName username profilePicture')
+      .populate('reactions.user', 'firstName lastName profilePicture username')
       .sort({ createdAt: 1 });
     res.status(200).json(comments);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+const updateComment = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { content } = req.body;
+
+    const comment = await Comment.findById(id);
+    if (!comment) return res.status(404).json({ message: 'Comment not found' });
+
+    if (comment.author.toString() !== req.user.id) {
+      return res.status(403).json({ message: 'Not authorized to edit this comment' });
+    }
+
+    comment.content = content;
+    await comment.save();
+
+    const populatedComment = await Comment.findById(id)
+      .populate('author', 'firstName lastName username profilePicture')
+      .populate('reactions.user', 'firstName lastName profilePicture username');
+
+    res.status(200).json(populatedComment);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+const deleteComment = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const comment = await Comment.findById(id);
+    if (!comment) return res.status(404).json({ message: 'Comment not found' });
+
+    if (comment.author.toString() !== req.user.id) {
+      return res.status(403).json({ message: 'Not authorized to delete this comment' });
+    }
+
+    await Comment.findByIdAndDelete(id);
+    // Also delete any replies to this comment
+    await Comment.deleteMany({ parentComment: id });
+
+    res.status(200).json({ message: 'Comment deleted successfully' });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
@@ -65,10 +111,13 @@ const reactToComment = async (req, res) => {
     }
 
     await comment.save();
-    res.status(200).json(comment.reactions);
+
+    const populatedComment = await Comment.findById(id).populate('reactions.user', 'firstName lastName profilePicture username');
+
+    res.status(200).json(populatedComment.reactions);
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
 };
 
-module.exports = { createComment, getCommentsByPost, reactToComment };
+module.exports = { createComment, getCommentsByPost, updateComment, deleteComment, reactToComment };

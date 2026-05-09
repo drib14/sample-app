@@ -25,7 +25,10 @@ const createPost = async (req, res) => {
 
     await newPost.save();
 
-    const populatedPost = await Post.findById(newPost._id).populate('author', 'firstName lastName username profilePicture');
+    const populatedPost = await Post.findById(newPost._id)
+      .populate('author', 'firstName lastName username profilePicture')
+      .populate('reactions.user', 'firstName lastName profilePicture username');
+
     res.status(201).json(populatedPost);
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -36,8 +39,55 @@ const getFeed = async (req, res) => {
   try {
     const posts = await Post.find()
       .populate('author', 'firstName lastName username profilePicture')
+      .populate('reactions.user', 'firstName lastName profilePicture username')
       .sort({ createdAt: -1 });
     res.status(200).json(posts);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+const updatePost = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { content } = req.body;
+
+    const post = await Post.findById(id);
+    if (!post) return res.status(404).json({ message: 'Post not found' });
+
+    if (post.author.toString() !== req.user.id) {
+      return res.status(403).json({ message: 'Not authorized to edit this post' });
+    }
+
+    post.content = content;
+    await post.save();
+
+    const populatedPost = await Post.findById(id)
+      .populate('author', 'firstName lastName username profilePicture')
+      .populate('reactions.user', 'firstName lastName profilePicture username');
+
+    res.status(200).json(populatedPost);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+const deletePost = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const post = await Post.findById(id);
+    if (!post) return res.status(404).json({ message: 'Post not found' });
+
+    if (post.author.toString() !== req.user.id) {
+      return res.status(403).json({ message: 'Not authorized to delete this post' });
+    }
+
+    await Post.findByIdAndDelete(id);
+    // Delete associated comments
+    await Comment.deleteMany({ post: id });
+
+    res.status(200).json({ message: 'Post deleted successfully' });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
@@ -52,14 +102,11 @@ const reactToPost = async (req, res) => {
     const post = await Post.findById(id);
     if (!post) return res.status(404).json({ message: 'Post not found' });
 
-    // Check if user already reacted with THIS emoji
     const existingReactionIndex = post.reactions.findIndex(r => r.user.toString() === userId && r.emoji === emoji);
 
     if (existingReactionIndex > -1) {
-      // Remove reaction (toggle)
       post.reactions.splice(existingReactionIndex, 1);
     } else {
-      // Find if user reacted with a different emoji and replace it, OR just add new (let's replace existing reaction from same user for simplicity, or allow multiple? Let's replace.)
       const anyReactionIndex = post.reactions.findIndex(r => r.user.toString() === userId);
       if (anyReactionIndex > -1) {
         post.reactions[anyReactionIndex].emoji = emoji;
@@ -69,10 +116,13 @@ const reactToPost = async (req, res) => {
     }
 
     await post.save();
-    res.status(200).json(post.reactions);
+
+    const populatedPost = await Post.findById(id).populate('reactions.user', 'firstName lastName profilePicture username');
+
+    res.status(200).json(populatedPost.reactions);
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
 };
 
-module.exports = { createPost, getFeed, reactToPost };
+module.exports = { createPost, getFeed, updatePost, deletePost, reactToPost };

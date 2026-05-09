@@ -25,8 +25,8 @@ const ReactionPicker = ({ onReact, currentReactions, currentUserId }) => {
     setShowPicker(false);
   };
 
-  // Find user's current reaction
-  const userReaction = currentReactions?.find(r => r.user === currentUserId)?.emoji;
+  // Find user's current reaction (handles both populated object or raw ID)
+  const userReaction = currentReactions?.find(r => (r.user?._id || r.user) === currentUserId)?.emoji;
 
   return (
     <div className="relative flex items-center gap-1" ref={pickerRef}>
