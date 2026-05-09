@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { toast } from 'react-toastify';
 import { useNavigate, Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { User, Mail, Calendar, MapPin, Hash } from 'lucide-react';
@@ -9,7 +10,6 @@ import axios from 'axios';
 const Register = () => {
   const [step, setStep] = useState(1);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
   const [addressQuery, setAddressQuery] = useState('');
   const [addressSuggestions, setAddressSuggestions] = useState([]);
 
@@ -30,20 +30,22 @@ const Register = () => {
   };
 
   const nextStep = () => {
-    setError('');
     if (step === 1) {
       if (!formData.firstName || !formData.lastName || !formData.gender) {
-        return setError('Please fill all fields');
+        toast.error('Please fill all fields');
+        return;
       }
     }
     if (step === 2) {
       if (!formData.dob || !formData.address) {
-        return setError('Please fill all fields');
+        toast.error('Please fill all fields');
+        return;
       }
     }
     if (step === 3) {
       if (!formData.email || !formData.username) {
-        return setError('Please fill all fields');
+        toast.error('Please fill all fields');
+        return;
       }
       handleRequestOtp();
       return;
@@ -53,7 +55,6 @@ const Register = () => {
 
   const prevStep = () => setStep(step - 1);
 
-  // Address Auto-complete using LocationIQ
   useEffect(() => {
     const delayDebounceFn = setTimeout(() => {
       if (addressQuery.length > 2) {
@@ -77,12 +78,12 @@ const Register = () => {
 
   const handleRequestOtp = async () => {
     setLoading(true);
-    setError('');
     try {
       await api.post('/auth/register-init', formData);
       setStep(4);
+      toast.success('Verification code sent!');
     } catch (err) {
-      setError(err.response?.data?.message || 'Something went wrong');
+      toast.error(err.response?.data?.message || 'Something went wrong');
     } finally {
       setLoading(false);
     }
@@ -90,14 +91,14 @@ const Register = () => {
 
   const handleVerifyOtp = async (otpValue) => {
     setLoading(true);
-    setError('');
     try {
       const res = await api.post('/auth/register-verify', { email: formData.email, otp: otpValue });
       localStorage.setItem('makiToken', res.data.token);
       localStorage.setItem('makiUser', JSON.stringify(res.data.user));
       navigate('/dashboard');
+      toast.success('Successfully registered!');
     } catch (err) {
-      setError(err.response?.data?.message || 'Invalid code');
+      toast.error(err.response?.data?.message || 'Invalid code');
     } finally {
       setLoading(false);
     }
@@ -309,8 +310,6 @@ const Register = () => {
               </motion.div>
             )}
           </AnimatePresence>
-
-          {error && <p className="text-red-500 text-sm text-center mt-4">{error}</p>}
 
           {/* Navigation Buttons */}
           <div className="mt-8 flex flex-col gap-4">

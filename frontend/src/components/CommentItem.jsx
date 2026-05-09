@@ -5,14 +5,19 @@ import Avatar from './Avatar';
 import ReactionPicker from './ReactionPicker';
 import DropdownMenu from './DropdownMenu';
 import ReactionsModal from './ReactionsModal';
+import ConfirmModal from './ConfirmModal';
 import api from '../utils/api';
+import { toast } from 'react-toastify';
 
 const CommentItem = ({ comment, currentUser, onReplyClick, onCommentDeleted }) => {
   const [reactions, setReactions] = useState(comment.reactions || []);
   const [isEditing, setIsEditing] = useState(false);
   const [editContent, setEditContent] = useState(comment.content || '');
   const [currentContent, setCurrentContent] = useState(comment.content || '');
+
+  // Modals state
   const [showReactionsModal, setShowReactionsModal] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
 
   const isAuthor = currentUser._id === comment.author._id;
 
@@ -23,7 +28,7 @@ const CommentItem = ({ comment, currentUser, onReplyClick, onCommentDeleted }) =
       });
       setReactions(res.data);
     } catch (err) {
-      console.error(err);
+      toast.error('Failed to react');
     }
   };
 
@@ -35,24 +40,24 @@ const CommentItem = ({ comment, currentUser, onReplyClick, onCommentDeleted }) =
       });
       setCurrentContent(res.data.content);
       setIsEditing(false);
+      toast.success('Comment updated');
     } catch (err) {
-      console.error(err);
+      toast.error('Failed to update comment');
     }
   };
 
   const handleDelete = async () => {
-    if (!window.confirm('Are you sure you want to delete this comment?')) return;
     try {
       await api.delete(`/comments/${comment._id}`, {
         headers: { Authorization: `Bearer ${localStorage.getItem('makiToken')}` }
       });
       if (onCommentDeleted) onCommentDeleted(comment._id);
+      toast.success('Comment deleted');
     } catch (err) {
-      console.error(err);
+      toast.error('Failed to delete comment');
     }
   };
 
-  // Group reactions for display
   const reactionCounts = reactions.reduce((acc, r) => {
     acc[r.emoji] = (acc[r.emoji] || 0) + 1;
     return acc;
@@ -97,7 +102,7 @@ const CommentItem = ({ comment, currentUser, onReplyClick, onCommentDeleted }) =
               <DropdownMenu
                 isAuthor={isAuthor}
                 onEdit={() => setIsEditing(true)}
-                onDelete={handleDelete}
+                onDelete={() => setShowDeleteModal(true)}
               />
             </div>
           )}
@@ -136,6 +141,14 @@ const CommentItem = ({ comment, currentUser, onReplyClick, onCommentDeleted }) =
         isOpen={showReactionsModal}
         onClose={() => setShowReactionsModal(false)}
         reactions={reactions}
+      />
+
+      <ConfirmModal
+        isOpen={showDeleteModal}
+        onClose={() => setShowDeleteModal(false)}
+        onConfirm={handleDelete}
+        title="Delete Comment"
+        message="Are you sure you want to delete this comment? This action cannot be undone."
       />
     </div>
   );

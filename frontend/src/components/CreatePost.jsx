@@ -1,4 +1,5 @@
 import React, { useState, useRef } from 'react';
+import { toast } from 'react-toastify';
 import { Image, X, Loader2 } from 'lucide-react';
 import api from '../utils/api';
 import Avatar from './Avatar';
@@ -8,17 +9,16 @@ const CreatePost = ({ user, onPostCreated }) => {
   const [mediaFiles, setMediaFiles] = useState([]);
   const [mediaPreviews, setMediaPreviews] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
   const fileInputRef = useRef(null);
 
   const handleFileSelect = (e) => {
     const files = Array.from(e.target.files);
-    setError('');
 
     // Check file size (max 20MB total combined for simplicity, or per file)
     const totalSize = files.reduce((acc, file) => acc + file.size, 0);
     if (totalSize > 20 * 1024 * 1024) {
-      return setError('Total media size must be less than 20MB');
+      toast.error('Total media size must be less than 20MB');
+      return;
     }
 
     setMediaFiles(prev => [...prev, ...files]);
@@ -39,7 +39,6 @@ const CreatePost = ({ user, onPostCreated }) => {
     if (!content.trim() && mediaFiles.length === 0) return;
 
     setLoading(true);
-    setError('');
 
     const formData = new FormData();
     formData.append('content', content);
@@ -58,9 +57,10 @@ const CreatePost = ({ user, onPostCreated }) => {
       setContent('');
       setMediaFiles([]);
       setMediaPreviews([]);
+      toast.success('Post created successfully!');
       if (onPostCreated) onPostCreated(res.data);
     } catch (err) {
-      setError(err.response?.data?.message || 'Failed to create post');
+      toast.error(err.response?.data?.message || 'Failed to create post');
     } finally {
       setLoading(false);
     }
@@ -78,8 +78,6 @@ const CreatePost = ({ user, onPostCreated }) => {
             className="w-full bg-brown-50 border border-transparent focus:border-brown-200 rounded-xl p-3 text-brown-900 resize-none outline-none custom-scrollbar"
             rows="3"
           />
-
-          {error && <p className="text-red-500 text-sm mt-2">{error}</p>}
 
           {mediaPreviews.length > 0 && (
             <div className="flex flex-wrap gap-2 mt-3">

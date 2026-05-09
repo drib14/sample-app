@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { toast } from 'react-toastify';
 import { useNavigate, Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Mail } from 'lucide-react';
@@ -9,20 +10,22 @@ const Login = () => {
   const [step, setStep] = useState(1);
   const [email, setEmail] = useState('');
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
   const navigate = useNavigate();
 
   const handleRequestOtp = async (e) => {
     e.preventDefault();
-    if (!email) return setError('Email is required');
+    if (!email) {
+      toast.error('Email is required');
+      return;
+    }
 
     setLoading(true);
-    setError('');
     try {
       await api.post('/auth/login-init', { email });
       setStep(2);
+      toast.success('Verification code sent!');
     } catch (err) {
-      setError(err.response?.data?.message || 'Something went wrong');
+      toast.error(err.response?.data?.message || 'Something went wrong');
     } finally {
       setLoading(false);
     }
@@ -30,14 +33,14 @@ const Login = () => {
 
   const handleVerifyOtp = async (otpValue) => {
     setLoading(true);
-    setError('');
     try {
       const res = await api.post('/auth/login-verify', { email, otp: otpValue });
       localStorage.setItem('makiToken', res.data.token);
       localStorage.setItem('makiUser', JSON.stringify(res.data.user));
       navigate('/dashboard');
+      toast.success('Successfully logged in!');
     } catch (err) {
-      setError(err.response?.data?.message || 'Invalid code');
+      toast.error(err.response?.data?.message || 'Invalid code');
     } finally {
       setLoading(false);
     }
@@ -92,8 +95,6 @@ const Login = () => {
                   </div>
                 </div>
 
-                {error && <p className="text-red-500 text-sm text-center">{error}</p>}
-
                 <div>
                   <button
                     type="submit"
@@ -130,7 +131,6 @@ const Login = () => {
 
                   <OtpInput length={6} onComplete={handleVerifyOtp} />
 
-                  {error && <p className="text-red-500 text-sm mt-4">{error}</p>}
                   {loading && <p className="text-brown-500 text-sm mt-4">Verifying...</p>}
 
                   <button

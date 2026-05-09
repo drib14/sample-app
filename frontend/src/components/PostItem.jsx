@@ -9,7 +9,9 @@ import CommentItem from './CommentItem';
 import GifPicker from './GifPicker';
 import DropdownMenu from './DropdownMenu';
 import ReactionsModal from './ReactionsModal';
+import ConfirmModal from './ConfirmModal';
 import api from '../utils/api';
+import { toast } from 'react-toastify';
 
 const PostItem = ({ post, currentUser, onPostDeleted }) => {
   const [reactions, setReactions] = useState(post.reactions || []);
@@ -25,8 +27,9 @@ const PostItem = ({ post, currentUser, onPostDeleted }) => {
   const [editContent, setEditContent] = useState(post.content || '');
   const [currentContent, setCurrentContent] = useState(post.content || '');
 
-  // Reactions Modal state
+  // Modals state
   const [showReactionsModal, setShowReactionsModal] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
 
   const isAuthor = currentUser._id === post.author._id;
 
@@ -37,7 +40,7 @@ const PostItem = ({ post, currentUser, onPostDeleted }) => {
       });
       setReactions(res.data);
     } catch (err) {
-      console.error(err);
+      toast.error('Failed to react');
     }
   };
 
@@ -49,20 +52,21 @@ const PostItem = ({ post, currentUser, onPostDeleted }) => {
       });
       setCurrentContent(res.data.content);
       setIsEditing(false);
+      toast.success('Post updated!');
     } catch (err) {
-      console.error(err);
+      toast.error('Failed to update post');
     }
   };
 
   const handleDelete = async () => {
-    if (!window.confirm('Are you sure you want to delete this post?')) return;
     try {
       await api.delete(`/posts/${post._id}`, {
         headers: { Authorization: `Bearer ${localStorage.getItem('makiToken')}` }
       });
       if (onPostDeleted) onPostDeleted(post._id);
+      toast.success('Post deleted successfully');
     } catch (err) {
-      console.error(err);
+      toast.error('Failed to delete post');
     }
   };
 
@@ -74,7 +78,7 @@ const PostItem = ({ post, currentUser, onPostDeleted }) => {
       });
       setComments(res.data);
     } catch (err) {
-      console.error(err);
+      toast.error('Failed to load comments');
     } finally {
       setLoadingComments(false);
     }
@@ -104,7 +108,7 @@ const PostItem = ({ post, currentUser, onPostDeleted }) => {
       setReplyingTo(null);
       setShowGifPicker(false);
     } catch (err) {
-      console.error(err);
+      toast.error('Failed to post comment');
     }
   };
 
@@ -124,7 +128,6 @@ const PostItem = ({ post, currentUser, onPostDeleted }) => {
     const replies = comments.filter(c => c.parentComment === parentId);
     if (replies.length === 0) return null;
 
-    // Prevent nesting too deep on UI
     const paddingLeft = depth > 3 ? 'pl-2' : 'pl-4';
 
     return (
@@ -163,7 +166,7 @@ const PostItem = ({ post, currentUser, onPostDeleted }) => {
         <DropdownMenu
           isAuthor={isAuthor}
           onEdit={() => setIsEditing(true)}
-          onDelete={handleDelete}
+          onDelete={() => setShowDeleteModal(true)}
         />
       </div>
 
@@ -199,7 +202,7 @@ const PostItem = ({ post, currentUser, onPostDeleted }) => {
             <button
               key={emoji}
               onClick={() => setShowReactionsModal(true)}
-              className="flex items-center gap-1 bg-brown-50 hover:bg-brown-100 text-brown-700 px-2.5 py-1 rounded-full text-sm transition-colors"
+              className="flex items-center gap-1 bg-brown-50 hover:bg-brown-100 text-brown-700 px-2.5 py-1 rounded-full text-sm transition-colors cursor-pointer"
             >
               {emoji} {count}
             </button>
@@ -235,7 +238,6 @@ const PostItem = ({ post, currentUser, onPostDeleted }) => {
                     onReplyClick={setReplyingTo}
                     onCommentDeleted={handleCommentDeleted}
                   />
-                  {/* Recursively Render Replies */}
                   {renderReplies(comment._id)}
                 </div>
               ))}
@@ -320,6 +322,14 @@ const PostItem = ({ post, currentUser, onPostDeleted }) => {
         isOpen={showReactionsModal}
         onClose={() => setShowReactionsModal(false)}
         reactions={reactions}
+      />
+
+      <ConfirmModal
+        isOpen={showDeleteModal}
+        onClose={() => setShowDeleteModal(false)}
+        onConfirm={handleDelete}
+        title="Delete Post"
+        message="Are you sure you want to delete this post? This action cannot be undone."
       />
     </div>
   );
