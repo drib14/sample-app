@@ -1,4 +1,5 @@
 const { Server } = require('socket.io');
+const User = require('./models/User');
 
 let io;
 
@@ -13,14 +14,31 @@ module.exports = {
 
     io.on('connection', (socket) => {
       console.log('Client connected:', socket.id);
+      let currentUserId = null;
 
-      socket.on('join_user_room', (userId) => {
+      socket.on('join_user_room', async (userId) => {
         socket.join(userId);
+        currentUserId = userId;
         console.log(`User ${userId} joined their room`);
+
+        try {
+          await User.findByIdAndUpdate(userId, { isOnline: true });
+          io.emit('user_status_change', { userId, isOnline: true });
+        } catch (e) {
+          console.error('Error setting user online status', e);
+        }
       });
 
-      socket.on('disconnect', () => {
+      socket.on('disconnect', async () => {
         console.log('Client disconnected:', socket.id);
+        if (currentUserId) {
+          try {
+            await User.findByIdAndUpdate(currentUserId, { isOnline: false });
+            io.emit('user_status_change', { userId: currentUserId, isOnline: false });
+          } catch (e) {
+            console.error('Error setting user offline status', e);
+          }
+        }
       });
     });
 

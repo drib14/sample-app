@@ -52,23 +52,11 @@ const Navbar = ({ user }) => {
     <nav className="bg-white sticky top-0 z-50 border-b border-brown-100 shadow-sm">
       <div className="w-full px-4 py-3 flex items-center justify-between">
 
-        {/* Left: Blank or functional balance */}
-        <div className="flex-1 hidden md:flex"></div>
-
-        {/* Center: Main Nav */}
-        <div className="flex-1 flex justify-center items-center gap-8">
-          <Link to="/dashboard" className="group flex flex-col items-center text-brown-400 hover:text-brown-900 transition-colors relative p-2">
-            <Home size={28} className="group-hover:scale-110 transition-transform" />
-            <span className="absolute -bottom-4 opacity-0 group-hover:opacity-100 text-xs font-bold transition-opacity">Home</span>
+        {/* Left: Trademark & Search */}
+        <div className="flex-1 flex items-center gap-4">
+          <Link to="/dashboard" className="text-2xl font-black tracking-tighter text-brown-900 cursor-pointer select-none hover:text-brown-700 transition-colors" style={{ fontFamily: 'Georgia, serif' }}>
+            Maki
           </Link>
-          <button onClick={() => setIsHandshakeOpen(true)} className="group flex flex-col items-center text-brown-400 hover:text-brown-900 transition-colors relative p-2">
-            <Handshake size={28} className="group-hover:scale-110 transition-transform" />
-            <span className="absolute -bottom-4 opacity-0 group-hover:opacity-100 text-xs font-bold transition-opacity">Connect</span>
-          </button>
-        </div>
-
-        {/* Right: Search, Notifications, Trademark, Dropdown */}
-        <div className="flex-1 flex items-center justify-end gap-4">
 
           <div className="relative hidden md:block">
             <div className="relative">
@@ -84,7 +72,7 @@ const Navbar = ({ user }) => {
 
             {/* Search Results Dropdown */}
             {searchQuery.trim().length > 0 && (
-              <div className="absolute top-full mt-2 right-0 w-64 bg-white rounded-xl shadow-lg border border-brown-100 py-2 z-50">
+              <div className="absolute top-full mt-2 left-0 w-64 bg-white rounded-xl shadow-lg border border-brown-100 py-2 z-50">
                 {isSearching ? (
                   <p className="px-4 py-2 text-sm text-brown-500 text-center">Searching...</p>
                 ) : searchResults.length > 0 ? (
@@ -114,7 +102,22 @@ const Navbar = ({ user }) => {
               </div>
             )}
           </div>
+        </div>
 
+        {/* Center: Main Nav */}
+        <div className="flex-1 flex justify-center items-center gap-8">
+          <Link to="/dashboard" className="group flex flex-col items-center text-brown-400 hover:text-brown-900 transition-colors relative p-2">
+            <Home size={28} className="group-hover:scale-110 transition-transform" />
+            <span className="absolute -bottom-4 opacity-0 group-hover:opacity-100 text-xs font-bold transition-opacity">Home</span>
+          </Link>
+          <button onClick={() => setIsHandshakeOpen(true)} className="group flex flex-col items-center text-brown-400 hover:text-brown-900 transition-colors relative p-2">
+            <Handshake size={28} className="group-hover:scale-110 transition-transform" />
+            <span className="absolute -bottom-4 opacity-0 group-hover:opacity-100 text-xs font-bold transition-opacity">Connect</span>
+          </button>
+        </div>
+
+        {/* Right: Notifications, Dropdown */}
+        <div className="flex-1 flex items-center justify-end gap-4">
           <NotificationBell user={user} />
 
           <div className="relative">
@@ -152,10 +155,6 @@ const Navbar = ({ user }) => {
               )}
             </AnimatePresence>
           </div>
-
-          <h1 className="text-2xl font-black tracking-tighter text-brown-900 hidden md:block cursor-pointer ml-4 mr-2 select-none hover:text-brown-700 transition-colors" style={{ fontFamily: 'Georgia, serif' }}>
-            Maki
-          </h1>
         </div>
       </div>
       <HandshakeModal isOpen={isHandshakeOpen} onClose={() => setIsHandshakeOpen(false)} />

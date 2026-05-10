@@ -13,6 +13,8 @@ import ReactionsModal from './ReactionsModal';
 import ConfirmModal from './ConfirmModal';
 import RichText from './RichText';
 import MentionsTextarea from './MentionsTextarea';
+import EmojiPickerComponent from './EmojiPickerComponent';
+import { Smile } from 'lucide-react';
 import api from '../utils/api';
 import { toast } from 'react-toastify';
 
@@ -23,6 +25,7 @@ const PostItem = ({ post: initialPost, currentUser, onPostDeleted }) => {
   const [showComments, setShowComments] = useState(false);
   const [commentText, setCommentText] = useState('');
   const [showGifPicker, setShowGifPicker] = useState(false);
+  const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const [replyingTo, setReplyingTo] = useState(null);
   const [loadingComments, setLoadingComments] = useState(false);
 
@@ -349,6 +352,14 @@ const PostItem = ({ post: initialPost, currentUser, onPostDeleted }) => {
 
                 <div className="flex items-center gap-1 shrink-0">
                   <button
+                    onClick={() => setShowEmojiPicker(!showEmojiPicker)}
+                    className="p-2 text-brown-400 hover:text-brown-600 rounded-lg hover:bg-brown-100 transition-colors flex items-center justify-center"
+                    title="Add Emoji"
+                  >
+                    <Smile size={20} />
+                  </button>
+
+                  <button
                     onClick={() => setShowGifPicker(!showGifPicker)}
                     className="p-2 text-brown-400 hover:text-brown-600 rounded-lg hover:bg-brown-100 transition-colors flex items-center justify-center"
                     title="Add GIF"
@@ -386,6 +397,12 @@ const PostItem = ({ post: initialPost, currentUser, onPostDeleted }) => {
                     <GifPicker
                       onSelect={(url) => submitComment(url)}
                       onClose={() => setShowGifPicker(false)}
+                    />
+                  )}
+                  {showEmojiPicker && (
+                    <EmojiPickerComponent
+                      onSelect={(emoji) => setCommentText(prev => prev + emoji)}
+                      onClose={() => setShowEmojiPicker(false)}
                     />
                   )}
                 </AnimatePresence>

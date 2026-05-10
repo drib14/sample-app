@@ -38,16 +38,24 @@ const getUserProfile = async (req, res) => {
 const updateUserProfile = async (req, res) => {
   try {
     const userId = req.user.id;
-    const { firstName, lastName, address } = req.body;
+    const { firstName, lastName, address, bio, work, relationshipStatus, elementary, highSchool, college } = req.body;
 
     const user = await User.findById(userId);
     if (!user) {
       return res.status(404).json({ message: 'User not found' });
     }
 
-    if (firstName) user.firstName = firstName;
-    if (lastName) user.lastName = lastName;
-    if (address) user.address = address;
+    if (firstName !== undefined) user.firstName = firstName;
+    if (lastName !== undefined) user.lastName = lastName;
+    if (address !== undefined) user.address = address;
+    if (bio !== undefined) user.bio = bio;
+    if (work !== undefined) user.work = work;
+    if (relationshipStatus !== undefined) user.relationshipStatus = relationshipStatus;
+
+    if (!user.education) user.education = {};
+    if (elementary !== undefined) user.education.elementary = elementary;
+    if (highSchool !== undefined) user.education.highSchool = highSchool;
+    if (college !== undefined) user.education.college = college;
 
     if (req.file) {
       user.profilePicture = req.file.path;

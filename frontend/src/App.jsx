@@ -10,19 +10,8 @@ import socket from './utils/socket';
 import { useEffect } from 'react';
 
 function App() {
-  useEffect(() => {
-    const token = localStorage.getItem('makiToken');
-    const storedUser = localStorage.getItem('makiUser');
-    if (token && storedUser) {
-      const user = JSON.parse(storedUser);
-      socket.connect();
-      socket.emit('join_user_room', user._id);
-    }
-
-    return () => {
-      socket.disconnect();
-    };
-  }, []);
+  // Let the connection logic be handled inside Dashboard and Profile
+  // where we can watch user state changes upon successful login
 
   return (
     <>

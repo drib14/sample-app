@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
-import { MapPin, Calendar, Clock, User as UserIcon, Upload } from 'lucide-react';
+import { MapPin, Calendar, Clock, User as UserIcon, Upload, Briefcase, Heart, BookOpen, GraduationCap, School } from 'lucide-react';
 import api from '../utils/api';
+import socket from '../utils/socket';
 import PostItem from '../components/PostItem';
 import Navbar from '../components/Navbar';
 import EditableProfileCard from '../components/EditableProfileCard';
+import AutocompleteProfileCard from '../components/AutocompleteProfileCard';
 import { format } from 'date-fns';
 import { toast } from 'react-toastify';
 
@@ -23,7 +25,13 @@ const Profile = () => {
       navigate('/login');
       return;
     }
-    setCurrentUser(JSON.parse(storedUser));
+    const parsedUser = JSON.parse(storedUser);
+    setCurrentUser(parsedUser);
+
+    if (!socket.connected) {
+      socket.connect();
+    }
+    socket.emit('join_user_room', parsedUser._id);
   }, [navigate]);
 
   const fetchProfileData = async () => {
@@ -50,17 +58,21 @@ const Profile = () => {
   }, [username]);
 
   useEffect(() => {
-    import('../utils/socket').then(({ default: socket }) => {
-      socket.on('post_deleted', (deletedPostId) => {
-        setPosts(prevPosts => prevPosts.filter(p => p._id !== deletedPostId));
-      });
+    socket.on('post_deleted', (deletedPostId) => {
+      setPosts(prevPosts => prevPosts.filter(p => p._id !== deletedPostId));
     });
+
+    socket.on('user_status_change', ({ userId, isOnline }) => {
+      if (profileUser && profileUser._id === userId) {
+        setProfileUser(prev => ({ ...prev, isOnline }));
+      }
+    });
+
     return () => {
-      import('../utils/socket').then(({ default: socket }) => {
-        socket.off('post_deleted');
-      });
+      socket.off('post_deleted');
+      socket.off('user_status_change');
     }
-  }, []);
+  }, [profileUser]);
 
   const handleProfileUpdated = (updatedUser) => {
     setProfileUser(updatedUser);
@@ -147,25 +159,62 @@ const Profile = () => {
               )}
             </div>
 
-            <h2 className="text-2xl font-bold text-brown-900 mb-1">
-              {profileUser.firstName} {profileUser.lastName}
-            </h2>
+            <div className="flex items-center gap-2 mb-1">
+              <h2 className="text-2xl font-bold text-brown-900">
+                {profileUser.firstName} {profileUser.lastName}
+              </h2>
+              {profileUser.isOnline && (
+                <div className="w-3 h-3 bg-green-500 rounded-full border-2 border-white shadow-sm" title="Online now"></div>
+              )}
+            </div>
             <p className="text-brown-500 font-medium mb-2">@{profileUser.username}</p>
           </div>
 
           <EditableProfileCard
-            title="First Name"
+            title="Mini Bio"
             icon={UserIcon}
-            field="firstName"
-            value={profileUser.firstName}
+            field="bio"
+            value={profileUser.bio}
             isEditable={isOwnProfile}
             onUpdate={handleProfileUpdated}
           />
           <EditableProfileCard
-            title="Last Name"
-            icon={UserIcon}
-            field="lastName"
-            value={profileUser.lastName}
+            title="Work"
+            icon={Briefcase}
+            field="work"
+            value={profileUser.work}
+            isEditable={isOwnProfile}
+            onUpdate={handleProfileUpdated}
+          />
+          <EditableProfileCard
+            title="Relationship Status"
+            icon={Heart}
+            field="relationshipStatus"
+            value={profileUser.relationshipStatus}
+            isEditable={isOwnProfile}
+            onUpdate={handleProfileUpdated}
+          />
+          <EditableProfileCard
+            title="Elementary School"
+            icon={BookOpen}
+            field="elementary"
+            value={profileUser.education?.elementary}
+            isEditable={isOwnProfile}
+            onUpdate={handleProfileUpdated}
+          />
+          <EditableProfileCard
+            title="High School"
+            icon={School}
+            field="highSchool"
+            value={profileUser.education?.highSchool}
+            isEditable={isOwnProfile}
+            onUpdate={handleProfileUpdated}
+          />
+          <AutocompleteProfileCard
+            title="College / University"
+            icon={GraduationCap}
+            field="college"
+            value={profileUser.education?.college}
             isEditable={isOwnProfile}
             onUpdate={handleProfileUpdated}
           />

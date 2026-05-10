@@ -24,3 +24,13 @@
 12:55:07 AM [vite] (client) hmr update /src/App.jsx, /src/index.css
 12:55:12 AM [vite] (client) hmr update /src/index.css, /src/pages/Dashboard.jsx
 12:55:23 AM [vite] (client) hmr update /src/index.css, /src/components/Navbar.jsx
+1:11:23 AM [vite] (client) hmr update /src/index.css, /src/components/Navbar.jsx
+1:13:44 AM [vite] (client) hmr update /src/index.css, /src/components/PostItem.jsx
+1:13:56 AM [vite] (client) hmr update /src/index.css, /src/components/PostItem.jsx
+1:14:05 AM [vite] (client) hmr update /src/index.css, /src/components/PostItem.jsx
+1:15:05 AM [vite] (client) hmr update /src/index.css, /src/pages/Profile.jsx
+1:15:20 AM [vite] (client) hmr update /src/index.css, /src/pages/Profile.jsx
+1:16:05 AM [vite] (client) hmr update /src/index.css, /src/pages/Profile.jsx
+1:21:29 AM [vite] (client) hmr update /src/App.jsx, /src/index.css
+1:22:07 AM [vite] (client) hmr update /src/index.css, /src/pages/Dashboard.jsx
+1:23:01 AM [vite] (client) hmr update /src/index.css, /src/pages/Profile.jsx

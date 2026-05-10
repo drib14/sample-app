@@ -22,6 +22,13 @@ const Dashboard = () => {
     } else {
       const parsedUser = JSON.parse(storedUser);
       setUser(parsedUser);
+
+      // Setup socket globally for the authenticated session
+      if (!socket.connected) {
+        socket.connect();
+      }
+      socket.emit('join_user_room', parsedUser._id);
+
       fetchPosts();
     }
   }, [navigate]);
