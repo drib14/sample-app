@@ -14,6 +14,8 @@ const userSchema = new mongoose.Schema({
   bio: { type: String, default: '' },
   work: { type: String, default: '' },
   relationshipStatus: { type: String, default: '' },
+  partner: { type: mongoose.Schema.Types.ObjectId, ref: 'User', default: null },
+  relationshipDate: { type: Date, default: null },
   education: {
     elementary: { type: String, default: '' },
     highSchool: { type: String, default: '' },
@@ -21,7 +23,10 @@ const userSchema = new mongoose.Schema({
   },
 
   // Active status
-  isOnline: { type: Boolean, default: false }
+  isOnline: { type: Boolean, default: false },
+
+  // Saved Posts
+  savedPosts: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Post' }]
 }, { timestamps: true });
 
 module.exports = mongoose.model('User', userSchema);

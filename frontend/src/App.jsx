@@ -7,8 +7,6 @@ import Locked from './pages/Locked';
 import Dashboard from './pages/Dashboard';
 import Profile from './pages/Profile';
 import ProfileAbout from './pages/ProfileAbout';
-import socket from './utils/socket';
-import { useEffect } from 'react';
 
 function App() {
   // Let the connection logic be handled inside Dashboard and Profile

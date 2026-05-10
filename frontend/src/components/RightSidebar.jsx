@@ -49,6 +49,30 @@ const RightSidebar = ({ posts }) => {
       });
   }, [posts]);
 
+  // Aggregate trending hashtags from recent posts content
+  const trendingTopics = React.useMemo(() => {
+    const hashtagCounts = {};
+    const hashtagRegex = /#[\w]+/g;
+
+    posts.forEach(post => {
+      if (post.content) {
+        const tags = post.content.match(hashtagRegex);
+        if (tags) {
+          // unique tags per post so a spammer can't dominate easily
+          const uniqueTags = [...new Set(tags)];
+          uniqueTags.forEach(tag => {
+            hashtagCounts[tag] = (hashtagCounts[tag] || 0) + 1;
+          });
+        }
+      }
+    });
+
+    return Object.entries(hashtagCounts)
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 3)
+      .map(([tag, count]) => ({ tag, count }));
+  }, [posts]);
+
   return (
     <div className="w-full space-y-6">
       {/* Network Vibe / Mood Board */}
@@ -97,20 +121,25 @@ const RightSidebar = ({ posts }) => {
         )}
       </div>
 
-      {/* Placeholder for trending or other widgets */}
+      {/* Trending Topics */}
       <div className="bg-white rounded-2xl shadow-sm border border-brown-100 p-5">
         <div className="flex items-center gap-2 mb-4 text-brown-900">
           <TrendingUp size={20} className="text-green-500" />
           <h3 className="font-bold">Trending Topics</h3>
         </div>
-        <div className="space-y-3">
-          {['#MakiLaunch', '#Photography', '#WeekendVibes'].map((tag, i) => (
-            <div key={i} className="group cursor-pointer">
-              <p className="text-sm font-semibold text-brown-800 group-hover:text-primary transition-colors">{tag}</p>
-              <p className="text-xs text-brown-400">{Math.floor(Math.random() * 100) + 10} posts</p>
-            </div>
-          ))}
-        </div>
+
+        {trendingTopics.length > 0 ? (
+          <div className="space-y-3">
+            {trendingTopics.map(({ tag, count }, i) => (
+              <div key={i} className="group cursor-pointer">
+                <p className="text-sm font-semibold text-brown-800 group-hover:text-primary transition-colors">{tag}</p>
+                <p className="text-xs text-brown-400">{count} {count === 1 ? 'post' : 'posts'}</p>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <p className="text-sm text-brown-400 text-center py-4">No trending topics yet.</p>
+        )}
       </div>
     </div>
   );

@@ -86,7 +86,7 @@ const createPost = async (req, res) => {
 const getFeed = async (req, res) => {
   try {
     const posts = await Post.find()
-      .populate('author', 'firstName lastName username profilePicture')
+      .populate('author', 'firstName lastName username profilePicture isOnline')
       .populate('reactions.user', 'firstName lastName profilePicture username')
       .populate('tags', 'firstName lastName username profilePicture')
       .sort({ createdAt: -1 });
@@ -112,7 +112,7 @@ const updatePost = async (req, res) => {
     await post.save();
 
     const populatedPost = await Post.findById(id)
-      .populate('author', 'firstName lastName username profilePicture')
+      .populate('author', 'firstName lastName username profilePicture isOnline')
       .populate('reactions.user', 'firstName lastName profilePicture username')
       .populate('tags', 'firstName lastName username profilePicture');
 
@@ -236,7 +236,7 @@ const getUserPosts = async (req, res) => {
     }
 
     const posts = await Post.find({ author: user._id })
-      .populate('author', 'firstName lastName username profilePicture')
+      .populate('author', 'firstName lastName username profilePicture isOnline')
       .populate('reactions.user', 'firstName lastName profilePicture username')
       .populate('tags', 'firstName lastName username profilePicture')
       .sort({ createdAt: -1 });
@@ -276,4 +276,20 @@ const getUserMedia = async (req, res) => {
   }
 };
 
-module.exports = { createPost, getFeed, updatePost, deletePost, reactToPost, votePoll, getUserPosts, getUserMedia };
+const getPostById = async (req, res) => {
+  try {
+    const post = await Post.findById(req.params.id)
+      .populate('author', 'firstName lastName username profilePicture isOnline')
+      .populate('tags', 'firstName lastName username profilePicture');
+
+    if (!post) {
+      return res.status(404).json({ message: 'Post not found' });
+    }
+
+    res.status(200).json(post);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+module.exports = { createPost, getFeed, updatePost, deletePost, reactToPost, votePoll, getUserPosts, getUserMedia, getPostById };

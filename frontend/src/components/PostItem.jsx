@@ -14,7 +14,7 @@ import ConfirmModal from './ConfirmModal';
 import RichText from './RichText';
 import MentionsTextarea from './MentionsTextarea';
 import EmojiPickerComponent from './EmojiPickerComponent';
-import { Smile } from 'lucide-react';
+import { Smile, Bookmark } from 'lucide-react';
 import api from '../utils/api';
 import { toast } from 'react-toastify';
 
@@ -39,6 +39,31 @@ const PostItem = ({ post: initialPost, currentUser, onPostDeleted }) => {
   const [showDeleteModal, setShowDeleteModal] = useState(false);
 
   const isAuthor = currentUser._id === post.author._id;
+  const [isSaved, setIsSaved] = useState(currentUser?.savedPosts?.includes(post._id) || false);
+
+  useEffect(() => {
+    if (currentUser?.savedPosts) {
+      setIsSaved(currentUser.savedPosts.includes(post._id));
+    }
+  }, [currentUser, post._id]);
+
+  const handleToggleSave = async () => {
+    try {
+      const res = await api.post('/users/saved', { postId: post._id }, {
+        headers: { Authorization: `Bearer ${localStorage.getItem('makiToken')}` }
+      });
+      setIsSaved(res.data.includes(post._id));
+
+      // Update local storage user
+      const storedUser = JSON.parse(localStorage.getItem('makiUser'));
+      storedUser.savedPosts = res.data;
+      localStorage.setItem('makiUser', JSON.stringify(storedUser));
+
+      toast.success(res.data.includes(post._id) ? 'Post saved' : 'Post removed from saved');
+    } catch (error) {
+      toast.error('Failed to save post');
+    }
+  };
 
   const handleReact = async (emoji) => {
     try {
@@ -175,7 +200,14 @@ const PostItem = ({ post: initialPost, currentUser, onPostDeleted }) => {
         <div className="flex flex-wrap gap-x-1 gap-y-1 items-center text-sm text-brown-600 mb-3 pb-3 border-b border-brown-50">
           <Link to={`/profile/${post.author.username}`} className="font-semibold text-brown-800 hover:underline">{post.author.firstName}</Link>
           <span>is</span>
-          {post.feeling && <span className="font-semibold text-brown-800">feeling {post.feeling}</span>}
+          {post.feeling && (
+             <span className="font-semibold text-brown-800 flex items-center gap-1">
+               feeling
+               {typeof post.feeling === 'string' && post.feeling.startsWith('{')
+                 ? JSON.parse(post.feeling).label
+                 : post.feeling}
+             </span>
+          )}
           {post.tags && post.tags.length > 0 && (
             <span>
               with {' '}
@@ -198,8 +230,11 @@ const PostItem = ({ post: initialPost, currentUser, onPostDeleted }) => {
       {/* Post Header */}
       <div className="flex items-start justify-between mb-4">
         <div className="flex items-center gap-3">
-          <Link to={`/profile/${post.author.username}`} className="shrink-0 hover:opacity-80 transition-opacity">
+          <Link to={`/profile/${post.author.username}`} className="shrink-0 relative hover:opacity-80 transition-opacity">
             <Avatar user={post.author} />
+            {post.author.isOnline && (
+              <div className="absolute bottom-0 right-0 w-3 h-3 bg-green-500 border-2 border-white rounded-full z-10"></div>
+            )}
           </Link>
           <div>
             <h3 className="font-bold text-brown-900 flex items-center gap-2">
@@ -210,12 +245,21 @@ const PostItem = ({ post: initialPost, currentUser, onPostDeleted }) => {
             </p>
           </div>
         </div>
-        <DropdownMenu
-          isAuthor={isAuthor}
-          username={post.author.username}
-          onEdit={() => setIsEditing(true)}
-          onDelete={() => setShowDeleteModal(true)}
-        />
+        <div className="flex items-center gap-2">
+          <button
+            onClick={handleToggleSave}
+            className={`p-2 rounded-full transition-colors ${isSaved ? 'text-primary bg-brown-100' : 'text-gray-400 hover:bg-gray-100'}`}
+            title={isSaved ? "Unsave Post" : "Save Post"}
+          >
+            <Bookmark size={20} fill={isSaved ? "currentColor" : "none"} />
+          </button>
+          <DropdownMenu
+            isAuthor={isAuthor}
+            username={post.author.username}
+            onEdit={() => setIsEditing(true)}
+            onDelete={() => setShowDeleteModal(true)}
+          />
+        </div>
       </div>
 
       {/* Post Content */}

@@ -113,15 +113,6 @@ const ProfileAbout = () => {
             isEditable={isOwnProfile}
             onUpdate={handleProfileUpdated}
           />
-          <EditableProfileCard
-            title="Location"
-            icon={MapPin}
-            field="address"
-            value={profileUser.address}
-            isEditable={isOwnProfile}
-            onUpdate={handleProfileUpdated}
-          />
-
           {/* Read-only cards */}
           <div className="bg-white rounded-2xl p-5 shadow-sm border border-brown-100 flex flex-col">
             <div className="flex items-center gap-3 mb-3 text-brown-900 font-semibold">

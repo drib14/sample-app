@@ -84,7 +84,28 @@ const NotificationBell = ({ user }) => {
       case 'mention': return 'mentioned you.';
       case 'connection_request': return 'sent you a connection request.';
       case 'connection_accepted': return 'accepted your connection request.';
+      case 'relationship_request': return 'sent you a relationship request.';
       default: return 'interacted with you.';
+    }
+  };
+
+  const handleRelationshipAction = async (e, notificationId, senderId, action) => {
+    e.preventDefault();
+    e.stopPropagation();
+
+    try {
+      await api.post('/users/relationship/handle', {
+        senderId,
+        action
+      }, {
+        headers: { Authorization: `Bearer ${localStorage.getItem('makiToken')}` }
+      });
+
+      // Remove from notifications locally
+      setNotifications(prev => prev.filter(n => n._id !== notificationId));
+      setUnreadCount(prev => Math.max(0, prev - 1));
+    } catch (err) {
+      console.error(err);
     }
   };
 
@@ -155,6 +176,23 @@ const NotificationBell = ({ user }) => {
                         <p className="text-xs text-brown-400 mt-1">
                           {formatDistanceToNow(new Date(notification.createdAt), { addSuffix: true })}
                         </p>
+
+                        {notification.type === 'relationship_request' && (
+                          <div className="flex items-center gap-2 mt-2">
+                            <button
+                              onClick={(e) => handleRelationshipAction(e, notification._id, notification.sender._id, 'accept')}
+                              className="px-3 py-1 bg-brown-500 hover:bg-brown-600 text-white text-xs rounded-full transition-colors"
+                            >
+                              Accept
+                            </button>
+                            <button
+                              onClick={(e) => handleRelationshipAction(e, notification._id, notification.sender._id, 'decline')}
+                              className="px-3 py-1 bg-brown-100 hover:bg-brown-200 text-brown-700 text-xs rounded-full transition-colors"
+                            >
+                              Decline
+                            </button>
+                          </div>
+                        )}
                       </div>
                     </div>
                   </Link>

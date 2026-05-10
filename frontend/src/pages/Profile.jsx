@@ -185,6 +185,40 @@ const Profile = () => {
             onUpdate={handleProfileUpdated}
           />
 
+          {/* Intro Snapshot */}
+          <div className="bg-white rounded-2xl p-5 shadow-sm border border-brown-100 space-y-4">
+            <h3 className="font-bold text-brown-900">Intro</h3>
+
+            <EditableProfileCard
+              title="Address"
+              icon={MapPin}
+              field="address"
+              value={profileUser.address}
+              isEditable={isOwnProfile}
+              onUpdate={handleProfileUpdated}
+            />
+
+            <div className="flex items-start gap-3 text-brown-700 text-sm">
+              <div className="p-2 bg-brown-50 rounded-lg text-brown-600 shrink-0">
+                <Calendar size={18} />
+              </div>
+              <div className="flex flex-col pt-1">
+                <span className="font-semibold text-brown-900">Date of Birth</span>
+                <span>{format(new Date(profileUser.dob), 'MMM d, yyyy')}</span>
+              </div>
+            </div>
+
+            <div className="flex items-start gap-3 text-brown-700 text-sm">
+              <div className="p-2 bg-brown-50 rounded-lg text-brown-600 shrink-0">
+                <Clock size={18} />
+              </div>
+              <div className="flex flex-col pt-1">
+                <span className="font-semibold text-brown-900">Joined</span>
+                <span>{format(new Date(profileUser.createdAt), 'MMMM yyyy')}</span>
+              </div>
+            </div>
+          </div>
+
           <Link to={`/profile/${username}/about`} className="block w-full text-center py-3 bg-white hover:bg-brown-50 border border-brown-100 rounded-xl font-bold text-brown-700 transition-colors shadow-sm">
             See more info about {profileUser.firstName}
           </Link>
