@@ -31,7 +31,7 @@ const MessageBubble = ({ msg, isMine, showAvatar, showTime, activeOtherParticipa
           <div className={`flex gap-3 max-w-[70%] ${isMine ? 'flex-row-reverse' : 'flex-row'}`}>
             {!isMine && (
                 <div className="w-8 shrink-0 flex items-end pb-1">
-                  {showAvatar && <Avatar src={msg.sender.profilePicture} fallback={msg.sender.firstName[0]} size="sm" />}
+                  {showAvatar && <Avatar src={msg.sender?.profilePicture} fallback={msg.sender?.firstName?.[0]} size="sm" />}
                 </div>
             )}
             <div className={`px-4 py-2.5 rounded-2xl text-[14px] italic text-brown-400 border border-brown-200 bg-brown-50`}>
@@ -54,7 +54,7 @@ const MessageBubble = ({ msg, isMine, showAvatar, showTime, activeOtherParticipa
         <div className={`flex gap-3 max-w-[70%] group ${isMine ? 'flex-row-reverse' : 'flex-row'} items-center`}>
           {!isMine && (
               <div className="w-8 shrink-0 flex items-end self-end pb-1">
-                {showAvatar && <Avatar src={msg.sender.profilePicture} fallback={msg.sender.firstName[0]} size="sm" />}
+                {showAvatar && <Avatar src={msg.sender?.profilePicture} fallback={msg.sender?.firstName?.[0]} size="sm" />}
               </div>
           )}
 

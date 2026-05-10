@@ -56,9 +56,9 @@ const MiniChatBox = ({ conversation, positionIndex }) => {
     // Mark as seen when opening or new messages arrive
     if (!isMinimized && messages.length > 0) {
       const lastMsg = messages[messages.length - 1];
-      if (lastMsg.sender._id !== user.id && lastMsg.status !== 'seen') {
+      if (lastMsg.sender?._id !== user.id && lastMsg.status !== 'seen') {
         api.put(`/messages/${conversation._id}/seen`).catch(console.error);
-        setMessages(prev => prev.map(m => m.sender._id !== user.id ? { ...m, status: 'seen' } : m));
+        setMessages(prev => prev.map(m => m.sender?._id !== user.id ? { ...m, status: 'seen' } : m));
       }
     }
   }, [messages, isMinimized]);
@@ -97,7 +97,7 @@ const MiniChatBox = ({ conversation, positionIndex }) => {
 
   const handleSeenAck = ({ conversationId }) => {
     if (conversationId === conversation._id) {
-      setMessages(prev => prev.map(m => m.sender._id === user.id && m.status !== 'seen' ? { ...m, status: 'seen' } : m));
+      setMessages(prev => prev.map(m => m.sender?._id === user.id && m.status !== 'seen' ? { ...m, status: 'seen' } : m));
     }
   };
 
@@ -252,8 +252,8 @@ const MiniChatBox = ({ conversation, positionIndex }) => {
         <>
           <div className="flex-1 overflow-y-auto p-3 bg-white flex flex-col gap-2">
             {messages.map((msg, idx) => {
-              const isMine = msg.sender._id === user.id;
-              const showAvatar = !isMine && (idx === 0 || messages[idx-1].sender._id !== msg.sender._id);
+              const isMine = msg.sender?._id === user.id;
+              const showAvatar = !isMine && (idx === 0 || messages[idx-1].sender?._id !== msg.sender?._id);
 
               return (
                 <div key={msg._id} className="flex flex-col relative w-full overflow-visible">

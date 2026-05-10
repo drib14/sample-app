@@ -69,9 +69,9 @@ const Messages = () => {
     // Mark as seen
     if (activeConversation && messages.length > 0) {
       const lastMsg = messages[messages.length - 1];
-      if (lastMsg.sender._id !== user.id && lastMsg.status !== 'seen') {
+      if (lastMsg.sender?._id !== user.id && lastMsg.status !== 'seen') {
         api.put(`/messages/${activeConversation._id}/seen`).catch(console.error);
-        setMessages(prev => prev.map(m => m.sender._id !== user.id ? { ...m, status: 'seen' } : m));
+        setMessages(prev => prev.map(m => m.sender?._id !== user.id ? { ...m, status: 'seen' } : m));
       }
     }
   }, [messages, activeConversation]);
@@ -108,7 +108,7 @@ const Messages = () => {
 
   const handleSeenAck = ({ conversationId }) => {
     if (activeConversation && conversationId === activeConversation._id) {
-      setMessages(prev => prev.map(m => m.sender._id === user.id && m.status !== 'seen' ? { ...m, status: 'seen' } : m));
+      setMessages(prev => prev.map(m => m.sender?._id === user.id && m.status !== 'seen' ? { ...m, status: 'seen' } : m));
     }
   };
 
@@ -282,7 +282,7 @@ const Messages = () => {
   const renderConversationList = (list) => {
     return list.map(conv => {
       const otherParticipant = conv.participants.find(p => p._id !== user.id);
-      const isUnread = conv.latestMessage && conv.latestMessage.sender._id !== user.id && conv.latestMessage.status !== 'seen';
+      const isUnread = conv.latestMessage && conv.latestMessage.sender?._id !== user.id && conv.latestMessage.status !== 'seen';
       const isActive = activeConversation?._id === conv._id;
 
       return (
@@ -309,7 +309,7 @@ const Messages = () => {
             <p className={`text-xs truncate ${isUnread ? 'font-semibold text-brown-900' : 'text-brown-500'}`}>
               {conv.latestMessage ? (
                 <>
-                  {conv.latestMessage.sender._id === user.id && 'You: '}
+                  {conv.latestMessage.sender?._id === user.id && 'You: '}
                   {conv.latestMessage.text || 'Sent an attachment'}
                 </>
               ) : 'Start a conversation'}
@@ -442,8 +442,8 @@ const Messages = () => {
                 )}
 
                 {messages.map((msg, idx) => {
-                  const isMine = msg.sender._id === user.id;
-                  const showAvatar = !isMine && (idx === 0 || messages[idx-1].sender._id !== msg.sender._id);
+                  const isMine = msg.sender?._id === user.id;
+                  const showAvatar = !isMine && (idx === 0 || messages[idx-1].sender?._id !== msg.sender?._id);
                   const showTime = idx === 0 || new Date(msg.createdAt) - new Date(messages[idx-1].createdAt) > 3600000; // 1 hour
 
                   return (

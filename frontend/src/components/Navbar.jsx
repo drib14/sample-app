@@ -155,7 +155,7 @@ const Navbar = ({ user }) => {
                         {conversations.length > 0 ? (
                           conversations.slice(0, 5).map(conv => {
                             const other = conv.participants.find(p => p._id !== user.id);
-                            const isUnread = conv.latestMessage && conv.latestMessage.sender._id !== user.id && conv.latestMessage.status !== 'seen';
+                            const isUnread = conv.latestMessage && conv.latestMessage.sender?._id !== user.id && conv.latestMessage.status !== 'seen';
                             return (
                               <div
                                 key={conv._id}
@@ -173,7 +173,7 @@ const Navbar = ({ user }) => {
                                     {other?.firstName} {other?.lastName}
                                   </p>
                                   <p className={`text-xs truncate ${isUnread ? 'font-semibold text-brown-900' : 'text-brown-500'}`}>
-                                    {conv.latestMessage ? (conv.latestMessage.sender._id === user.id ? `You: ${conv.latestMessage.text}` : conv.latestMessage.text) : 'Start a chat'}
+                                    {conv.latestMessage ? (conv.latestMessage.sender?._id === user.id ? `You: ${conv.latestMessage.text}` : conv.latestMessage.text) : 'Start a chat'}
                                   </p>
                                 </div>
                                 {isUnread && <div className="w-2.5 h-2.5 bg-brown-600 rounded-full shrink-0"></div>}
