@@ -6,6 +6,8 @@ import socket from '../utils/socket';
 import CreatePost from '../components/CreatePost';
 import PostItem from '../components/PostItem';
 import Navbar from '../components/Navbar';
+import LeftSidebar from '../components/LeftSidebar';
+import RightSidebar from '../components/RightSidebar';
 
 const Dashboard = () => {
   const [user, setUser] = useState(null);
@@ -73,29 +75,44 @@ const Dashboard = () => {
       <Navbar user={user} />
 
       {/* Main Content */}
-      <main className="max-w-3xl mx-auto px-4 py-8">
-        <CreatePost user={user} onPostCreated={handlePostCreated} />
+      <main className="max-w-7xl mx-auto px-4 py-8 flex flex-col lg:flex-row gap-6">
 
-        <div className="space-y-6">
-          {loadingPosts ? (
-            <div className="flex justify-center py-8">
-              <lord-icon
-                src="https://cdn.lordicon.com/xjovhxra.json"
-                trigger="loop"
-                colors="primary:#a18072,secondary:#43302b"
-                style={{ width: '50px', height: '50px' }}
-              ></lord-icon>
-            </div>
-          ) : posts.length > 0 ? (
-            posts.map(post => (
-              <PostItem key={post._id} post={post} currentUser={user} />
-            ))
-          ) : (
-            <div className="text-center py-12 bg-white rounded-2xl border border-brown-100">
-              <p className="text-brown-500">No posts yet. Be the first to share something!</p>
-            </div>
-          )}
+        {/* Left Sidebar */}
+        <div className="hidden lg:block lg:w-1/4 shrink-0 sticky top-24 h-max">
+          <LeftSidebar user={user} />
         </div>
+
+        {/* Center Feed */}
+        <div className="w-full lg:w-1/2 max-w-2xl mx-auto shrink-0">
+          <CreatePost user={user} onPostCreated={handlePostCreated} />
+
+          <div className="space-y-6">
+            {loadingPosts ? (
+              <div className="flex justify-center py-8">
+                <lord-icon
+                  src="https://cdn.lordicon.com/xjovhxra.json"
+                  trigger="loop"
+                  colors="primary:#a18072,secondary:#43302b"
+                  style={{ width: '50px', height: '50px' }}
+                ></lord-icon>
+              </div>
+            ) : posts.length > 0 ? (
+              posts.map(post => (
+                <PostItem key={post._id} post={post} currentUser={user} />
+              ))
+            ) : (
+              <div className="text-center py-12 bg-white rounded-2xl border border-brown-100">
+                <p className="text-brown-500">No posts yet. Be the first to share something!</p>
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Right Sidebar */}
+        <div className="hidden lg:block lg:w-1/4 shrink-0 sticky top-24 h-max">
+          <RightSidebar posts={posts} />
+        </div>
+
       </main>
     </div>
   );
