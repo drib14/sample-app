@@ -280,6 +280,7 @@ const getPostById = async (req, res) => {
   try {
     const post = await Post.findById(req.params.id)
       .populate('author', 'firstName lastName username profilePicture isOnline')
+      .populate('reactions.user', 'firstName lastName profilePicture username')
       .populate('tags', 'firstName lastName username profilePicture');
 
     if (!post) {

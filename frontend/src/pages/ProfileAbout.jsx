@@ -86,6 +86,7 @@ const ProfileAbout = () => {
             icon={Heart}
             field="relationshipStatus"
             value={profileUser.relationshipStatus}
+            dateValue={profileUser.relationshipDate}
             isEditable={isOwnProfile}
             onUpdate={handleProfileUpdated}
           />

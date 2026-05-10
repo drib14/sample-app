@@ -74,6 +74,9 @@ const LeftSidebar = ({ user }) => {
                 </p>
               </Link>
             ))}
+            <Link to="/saved" className="block text-center text-sm font-semibold text-primary hover:text-brown-700 transition-colors pt-2 border-t border-brown-50">
+              Show More
+            </Link>
           </div>
         ) : (
           <p className="text-sm text-brown-400 text-center py-4">No saved posts yet.</p>

@@ -17,9 +17,12 @@ const relationshipOptions = [
 
 const requiresPartner = ['In a relationship', 'Engaged', 'Married', 'It\'s complicated', 'In an open relationship'];
 
-const RelationshipSelectCard = ({ title, icon: Icon, field, value, isEditable, onUpdate }) => {
+import { format } from 'date-fns';
+
+const RelationshipSelectCard = ({ title, icon: Icon, field, value, dateValue, isEditable, onUpdate }) => {
   const [isEditing, setIsEditing] = useState(false);
   const [editValue, setEditValue] = useState(value || '');
+  const [editDate, setEditDate] = useState(dateValue ? new Date(dateValue).toISOString().split('T')[0] : '');
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState([]);
   const [isSearching, setIsSearching] = useState(false);
@@ -68,6 +71,11 @@ const RelationshipSelectCard = ({ title, icon: Icon, field, value, isEditable, o
       } else {
         const formData = new FormData();
         formData.append(field, editValue);
+        if (editDate) {
+          formData.append('relationshipDate', editDate);
+        } else {
+           formData.append('relationshipDate', '');
+        }
 
         const res = await api.put('/users/profile', formData, {
           headers: {
@@ -112,6 +120,17 @@ const RelationshipSelectCard = ({ title, icon: Icon, field, value, isEditable, o
               <option key={opt} value={opt}>{opt}</option>
             ))}
           </select>
+
+          {!requiresPartner.includes(editValue) && editValue !== '' && editValue !== 'Single' && (
+             <div className="mt-2 relative">
+                <input
+                   type="date"
+                   value={editDate}
+                   onChange={(e) => setEditDate(e.target.value)}
+                   className="w-full px-3 py-2 bg-brown-50 border border-brown-200 rounded-lg focus:outline-none focus:border-brown-400 text-sm text-brown-900"
+                />
+             </div>
+          )}
 
           {requiresPartner.includes(editValue) && (
             <div className="mt-2 relative">
@@ -184,8 +203,13 @@ const RelationshipSelectCard = ({ title, icon: Icon, field, value, isEditable, o
           </div>
         </div>
       ) : (
-        <div className="flex justify-between items-center text-brown-700 text-sm min-h-[20px]">
-          <span>{value || 'Not provided'}</span>
+        <div className="flex justify-between items-start text-brown-700 text-sm min-h-[20px]">
+          <div className="flex flex-col">
+            <span>{value || 'Not provided'}</span>
+            {value && dateValue && (
+              <span className="text-xs text-brown-400 mt-0.5">Since {format(new Date(dateValue), 'MMMM d, yyyy')}</span>
+            )}
+          </div>
           {isEditable && (
             <button
               onClick={() => setIsEditing(true)}

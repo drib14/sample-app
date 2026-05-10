@@ -39,7 +39,7 @@ const getUserProfile = async (req, res) => {
 const updateUserProfile = async (req, res) => {
   try {
     const userId = req.user.id;
-    const { firstName, lastName, address, bio, work, relationshipStatus, elementary, highSchool, college } = req.body;
+    const { firstName, lastName, address, bio, work, relationshipStatus, relationshipDate, elementary, highSchool, college } = req.body;
 
     const user = await User.findById(userId);
     if (!user) {
@@ -52,6 +52,7 @@ const updateUserProfile = async (req, res) => {
     if (bio !== undefined) user.bio = bio;
     if (work !== undefined) user.work = work;
     if (relationshipStatus !== undefined) user.relationshipStatus = relationshipStatus;
+    if (relationshipDate !== undefined) user.relationshipDate = relationshipDate ? new Date(relationshipDate) : null;
 
     if (!user.education) user.education = {};
     if (elementary !== undefined) user.education.elementary = elementary;
@@ -156,12 +157,13 @@ const handleRelationshipRequest = async (req, res) => {
     if (!user || !sender) return res.status(404).json({ message: 'User not found' });
 
     if (action === 'accept') {
+      const savedStatus = relationshipStatus || 'In a relationship';
       user.partner = senderId;
-      user.relationshipStatus = relationshipStatus || 'In a relationship';
+      user.relationshipStatus = savedStatus;
       user.relationshipDate = new Date();
 
       sender.partner = userId;
-      sender.relationshipStatus = relationshipStatus || 'In a relationship';
+      sender.relationshipStatus = savedStatus;
       sender.relationshipDate = new Date();
 
       await user.save();
