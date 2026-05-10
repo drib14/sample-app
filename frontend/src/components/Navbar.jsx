@@ -1,12 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
-import { Search, Home, User as UserIcon, Settings, LogOut, Handshake, Bookmark, Bell } from 'lucide-react';
+import { Search, Home, User as UserIcon, Settings, LogOut, Handshake, Bookmark, Bell, MessageCircle } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import api from '../utils/api';
 import NotificationBell from './NotificationBell';
 import HandshakeModal from './HandshakeModal';
+import { useChat } from '../context/ChatContext';
 
 const Navbar = ({ user }) => {
+  const { unreadCount, conversations, openMiniChat } = useChat();
   const navigate = useNavigate();
   const location = useLocation();
   const [searchQuery, setSearchQuery] = useState('');
@@ -15,6 +17,7 @@ const Navbar = ({ user }) => {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [isHandshakeOpen, setIsHandshakeOpen] = useState(false);
   const [showMobileSearch, setShowMobileSearch] = useState(false);
+  const [isMessagesDropdownOpen, setIsMessagesDropdownOpen] = useState(false);
 
   // Debounced search
   useEffect(() => {
@@ -124,6 +127,77 @@ const Navbar = ({ user }) => {
           {/* Right: Notifications, Profile */}
           {!showMobileSearch && (
             <div className="flex-1 flex items-center justify-end gap-2 md:gap-4 shrink-0">
+              {/* Messages Icon */}
+              <div className="relative">
+                <button
+                  onClick={() => setIsMessagesDropdownOpen(!isMessagesDropdownOpen)}
+                  className={`p-2 rounded-full transition-colors flex items-center justify-center relative ${isMessagesDropdownOpen ? 'bg-brown-100 text-brown-900' : 'text-brown-500 hover:bg-brown-50'}`}
+                >
+                  <MessageCircle size={22} />
+                  {unreadCount > 0 && (
+                    <span className="absolute top-1 right-1 w-4 h-4 bg-red-500 text-white text-[10px] font-bold flex items-center justify-center rounded-full border-2 border-white">
+                      {unreadCount > 9 ? '9+' : unreadCount}
+                    </span>
+                  )}
+                </button>
+                <AnimatePresence>
+                  {isMessagesDropdownOpen && (
+                    <motion.div
+                      initial={{ opacity: 0, scale: 0.95, y: -10 }}
+                      animate={{ opacity: 1, scale: 1, y: 0 }}
+                      exit={{ opacity: 0, scale: 0.95, y: -10 }}
+                      className="absolute right-0 mt-2 w-80 bg-white rounded-xl shadow-lg border border-brown-100 py-2 z-50 flex flex-col max-h-[400px]"
+                    >
+                      <div className="px-4 py-2 border-b border-brown-50 flex justify-between items-center">
+                        <h3 className="font-bold text-brown-900">Messages</h3>
+                      </div>
+                      <div className="flex-1 overflow-y-auto">
+                        {conversations.length > 0 ? (
+                          conversations.slice(0, 5).map(conv => {
+                            const other = conv.participants.find(p => p._id !== user.id);
+                            const isUnread = conv.latestMessage && conv.latestMessage.sender._id !== user.id && conv.latestMessage.status !== 'seen';
+                            return (
+                              <div
+                                key={conv._id}
+                                onClick={() => {
+                                  openMiniChat(conv);
+                                  setIsMessagesDropdownOpen(false);
+                                }}
+                                className="flex items-center gap-3 px-4 py-3 hover:bg-brown-50 transition-colors cursor-pointer border-b border-brown-50 last:border-0"
+                              >
+                                <div className="w-10 h-10 rounded-full bg-brown-200 overflow-hidden shrink-0">
+                                  {other?.profilePicture ? <img src={other.profilePicture} alt="User" className="w-full h-full object-cover" /> : <div className="w-full h-full flex items-center justify-center text-brown-600 font-bold">{other?.firstName[0]}</div>}
+                                </div>
+                                <div className="flex-1 min-w-0">
+                                  <p className={`text-sm truncate ${isUnread ? 'font-bold text-brown-900' : 'font-semibold text-brown-800'}`}>
+                                    {other?.firstName} {other?.lastName}
+                                  </p>
+                                  <p className={`text-xs truncate ${isUnread ? 'font-semibold text-brown-900' : 'text-brown-500'}`}>
+                                    {conv.latestMessage ? (conv.latestMessage.sender._id === user.id ? `You: ${conv.latestMessage.text}` : conv.latestMessage.text) : 'Start a chat'}
+                                  </p>
+                                </div>
+                                {isUnread && <div className="w-2.5 h-2.5 bg-brown-600 rounded-full shrink-0"></div>}
+                              </div>
+                            );
+                          })
+                        ) : (
+                          <p className="px-4 py-6 text-sm text-center text-brown-400">No messages yet.</p>
+                        )}
+                      </div>
+                      <div className="p-2 border-t border-brown-50">
+                        <Link
+                          to="/messages"
+                          onClick={() => setIsMessagesDropdownOpen(false)}
+                          className="block text-center text-sm font-semibold text-brown-600 hover:text-brown-900 py-1"
+                        >
+                          See all in Messenger
+                        </Link>
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
+
               <NotificationBell user={user} />
 
               <div className="relative">
