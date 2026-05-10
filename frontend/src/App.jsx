@@ -6,8 +6,24 @@ import Login from './pages/Login';
 import Locked from './pages/Locked';
 import Dashboard from './pages/Dashboard';
 import Profile from './pages/Profile';
+import socket from './utils/socket';
+import { useEffect } from 'react';
 
 function App() {
+  useEffect(() => {
+    const token = localStorage.getItem('makiToken');
+    const storedUser = localStorage.getItem('makiUser');
+    if (token && storedUser) {
+      const user = JSON.parse(storedUser);
+      socket.connect();
+      socket.emit('join_user_room', user._id);
+    }
+
+    return () => {
+      socket.disconnect();
+    };
+  }, []);
+
   return (
     <>
       <ToastContainer

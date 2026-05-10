@@ -8,3 +8,19 @@
   ➜  Local:   http://localhost:5173/
   ➜  Network: use --host to expose
 12:09:03 AM [vite] (client) [optimizer] bundling dependencies...
+12:46:22 AM [vite] (client) hmr update /src/index.css, /src/pages/Dashboard.jsx
+12:46:30 AM [vite] (client) hmr update /src/index.css, /src/pages/Dashboard.jsx
+12:46:51 AM [vite] (client) hmr update /src/index.css, /src/pages/Profile.jsx
+12:47:45 AM [vite] (client) hmr update /src/index.css, /src/pages/Dashboard.jsx
+12:47:52 AM [vite] (client) hmr update /src/index.css, /src/pages/Dashboard.jsx
+12:48:47 AM [vite] (client) hmr update /src/index.css, /src/pages/Profile.jsx
+12:48:54 AM [vite] (client) hmr update /src/index.css, /src/pages/Profile.jsx
+12:49:01 AM [vite] (client) hmr update /src/index.css, /src/pages/Profile.jsx
+12:49:18 AM [vite] (client) hmr update /src/index.css, /src/pages/Profile.jsx
+12:49:21 AM [vite] (client) hmr update /src/index.css, /src/components/EditProfileModal.jsx
+12:52:19 AM [vite] (client) [optimizer] bundling dependencies...
+12:52:21 AM [vite] (client) ✨ new dependencies optimized: socket.io-client
+12:52:21 AM [vite] (client) ✨ optimized dependencies changed. reloading
+12:55:07 AM [vite] (client) hmr update /src/App.jsx, /src/index.css
+12:55:12 AM [vite] (client) hmr update /src/index.css, /src/pages/Dashboard.jsx
+12:55:23 AM [vite] (client) hmr update /src/index.css, /src/components/Navbar.jsx

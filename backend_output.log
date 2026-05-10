@@ -1,4 +1,4 @@
-◇ injected env (0) from .env // tip: ⌘ override existing { override: true }
+◇ injected env (0) from .env // tip: ⌘ enable debugging { debug: true }
 Server is running on port 5000
 MongoDB connection error: MongooseServerSelectionError: connect ECONNREFUSED 127.0.0.1:27017
     at _handleConnectionErrors (/app/backend/node_modules/mongoose/lib/connection.js:1180:11)
@@ -32,3 +32,7 @@ MongoDB connection error: MongooseServerSelectionError: connect ECONNREFUSED 127
     logicalSessionTimeoutMinutes: null
   }
 }
+Client connected: B0EFnSq56petj6biAAAB
+User user123 joined their room
+User user123 joined their room
+Client disconnected: B0EFnSq56petj6biAAAB

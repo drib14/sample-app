@@ -1,6 +1,8 @@
 const Post = require('../models/Post');
 const Comment = require('../models/Comment');
 const User = require('../models/User');
+const Notification = require('../models/Notification');
+const socket = require('../socket');
 
 const createPost = async (req, res) => {
   try {
@@ -51,6 +53,29 @@ const createPost = async (req, res) => {
       .populate('author', 'firstName lastName username profilePicture')
       .populate('reactions.user', 'firstName lastName profilePicture username')
       .populate('tags', 'firstName lastName username profilePicture');
+
+    // Notify tagged users
+    if (tags && tags.length > 0) {
+      for (const taggedUserId of tags) {
+        if (taggedUserId.toString() !== req.user.id) {
+          const notification = new Notification({
+            recipient: taggedUserId,
+            sender: req.user.id,
+            type: 'mention',
+            post: newPost._id
+          });
+          await notification.save();
+          const popNotif = await Notification.findById(notification._id)
+            .populate('sender', 'firstName lastName username profilePicture')
+            .populate('post', 'content');
+          try {
+            socket.getIO().to(taggedUserId.toString()).emit('new_notification', popNotif);
+          } catch (e) {
+            console.log('Socket error', e);
+          }
+        }
+      }
+    }
 
     res.status(201).json(populatedPost);
   } catch (error) {
@@ -111,6 +136,13 @@ const deletePost = async (req, res) => {
     await Post.findByIdAndDelete(id);
     await Comment.deleteMany({ post: id });
 
+    // Emit socket event to update clients
+    try {
+      socket.getIO().emit('post_deleted', id);
+    } catch (e) {
+      console.log('Socket not ready');
+    }
+
     res.status(200).json({ message: 'Post deleted successfully' });
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -142,6 +174,25 @@ const reactToPost = async (req, res) => {
     await post.save();
 
     const populatedPost = await Post.findById(id).populate('reactions.user', 'firstName lastName profilePicture username');
+
+    // Notification for like
+    if (existingReactionIndex === -1 && post.author.toString() !== userId) {
+      const notification = new Notification({
+        recipient: post.author,
+        sender: userId,
+        type: 'like',
+        post: id
+      });
+      await notification.save();
+      const popNotif = await Notification.findById(notification._id)
+        .populate('sender', 'firstName lastName username profilePicture')
+        .populate('post', 'content');
+      try {
+        socket.getIO().to(post.author.toString()).emit('new_notification', popNotif);
+      } catch (e) {
+        console.log('Socket error', e);
+      }
+    }
 
     res.status(200).json(populatedPost.reactions);
   } catch (error) {

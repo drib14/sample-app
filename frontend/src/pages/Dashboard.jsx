@@ -2,8 +2,10 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import api from '../utils/api';
+import socket from '../utils/socket';
 import CreatePost from '../components/CreatePost';
 import PostItem from '../components/PostItem';
+import Navbar from '../components/Navbar';
 
 const Dashboard = () => {
   const [user, setUser] = useState(null);
@@ -18,10 +20,21 @@ const Dashboard = () => {
     if (!storedUser || !token) {
       navigate('/login');
     } else {
-      setUser(JSON.parse(storedUser));
+      const parsedUser = JSON.parse(storedUser);
+      setUser(parsedUser);
       fetchPosts();
     }
   }, [navigate]);
+
+  useEffect(() => {
+    socket.on('post_deleted', (deletedPostId) => {
+      setPosts(prevPosts => prevPosts.filter(p => p._id !== deletedPostId));
+    });
+
+    return () => {
+      socket.off('post_deleted');
+    }
+  }, []);
 
   const fetchPosts = async () => {
     try {
@@ -50,34 +63,7 @@ const Dashboard = () => {
 
   return (
     <div className="min-h-screen bg-brown-50">
-      {/* Navbar */}
-      <nav className="bg-white sticky top-0 z-40 border-b border-brown-100 shadow-sm">
-        <div className="max-w-3xl mx-auto px-4 py-3 flex justify-between items-center">
-          <h1 className="text-2xl font-bold text-brown-900 flex items-center gap-2">
-            <lord-icon
-              src="https://cdn.lordicon.com/surcxhka.json"
-              trigger="hover"
-              colors="primary:#a18072,secondary:#43302b"
-              style={{ width: '32px', height: '32px' }}
-            ></lord-icon>
-            Maki
-          </h1>
-          <div className="flex items-center gap-4">
-            <button
-              onClick={() => navigate(`/profile/${user.username}`)}
-              className="px-4 py-2 bg-brown-50 hover:bg-brown-100 text-brown-900 rounded-lg transition-colors font-medium text-sm"
-            >
-              My Profile
-            </button>
-            <button
-              onClick={handleLogout}
-              className="px-4 py-2 bg-brown-100 hover:bg-brown-200 text-brown-900 rounded-lg transition-colors font-medium text-sm"
-            >
-              Logout
-            </button>
-          </div>
-        </div>
-      </nav>
+      <Navbar user={user} />
 
       {/* Main Content */}
       <main className="max-w-3xl mx-auto px-4 py-8">
