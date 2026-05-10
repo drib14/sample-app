@@ -1,5 +1,6 @@
 const Post = require('../models/Post');
 const Comment = require('../models/Comment');
+const User = require('../models/User');
 
 const createPost = async (req, res) => {
   try {
@@ -175,4 +176,24 @@ const votePoll = async (req, res) => {
   }
 };
 
-module.exports = { createPost, getFeed, updatePost, deletePost, reactToPost, votePoll };
+const getUserPosts = async (req, res) => {
+  try {
+    const { username } = req.params;
+    const user = await User.findOne({ username });
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    const posts = await Post.find({ author: user._id })
+      .populate('author', 'firstName lastName username profilePicture')
+      .populate('reactions.user', 'firstName lastName profilePicture username')
+      .populate('tags', 'firstName lastName username profilePicture')
+      .sort({ createdAt: -1 });
+
+    res.status(200).json(posts);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+module.exports = { createPost, getFeed, updatePost, deletePost, reactToPost, votePoll, getUserPosts };

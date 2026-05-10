@@ -62,12 +62,20 @@ const Dashboard = () => {
             ></lord-icon>
             Maki
           </h1>
-          <button
-            onClick={handleLogout}
-            className="px-4 py-2 bg-brown-100 hover:bg-brown-200 text-brown-900 rounded-lg transition-colors font-medium text-sm"
-          >
-            Logout
-          </button>
+          <div className="flex items-center gap-4">
+            <button
+              onClick={() => navigate(`/profile/${user.username}`)}
+              className="px-4 py-2 bg-brown-50 hover:bg-brown-100 text-brown-900 rounded-lg transition-colors font-medium text-sm"
+            >
+              My Profile
+            </button>
+            <button
+              onClick={handleLogout}
+              className="px-4 py-2 bg-brown-100 hover:bg-brown-200 text-brown-900 rounded-lg transition-colors font-medium text-sm"
+            >
+              Logout
+            </button>
+          </div>
         </div>
       </nav>
 

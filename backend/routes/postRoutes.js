@@ -16,4 +16,7 @@ router.post('/:id/poll/vote', auth, votePoll);
 router.post('/:postId/comments', auth, createComment);
 router.get('/:postId/comments', auth, getCommentsByPost);
 
+const { getUserPosts } = require('../controllers/postController');
+router.get('/user/:username', auth, getUserPosts);
+
 module.exports = router;
