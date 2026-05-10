@@ -46,3 +46,4 @@
 1:48:29 AM [vite] (client) hmr update /src/App.jsx, /src/index.css
 1:52:54 AM [vite] (client) hmr update /src/index.css, /src/components/AutocompleteProfileCard.jsx
 1:53:21 AM [vite] (client) hmr update /src/pages/ProfileAbout.jsx, /src/index.css
+2:10:25 AM [vite] (client) hmr update /src/index.css, /src/pages/Profile.jsx

@@ -6,7 +6,6 @@ import socket from '../utils/socket';
 import PostItem from '../components/PostItem';
 import Navbar from '../components/Navbar';
 import EditableProfileCard from '../components/EditableProfileCard';
-import AutocompleteProfileCard from '../components/AutocompleteProfileCard';
 import { format } from 'date-fns';
 import { toast } from 'react-toastify';
 
