@@ -4,9 +4,11 @@ import { useChat } from '../context/ChatContext';
 import api from '../utils/api';
 import Navbar from '../components/Navbar';
 import Avatar from '../components/Avatar';
-import { Search, Send, Paperclip, MoreVertical, X } from 'lucide-react';
+import { Search, Send, Paperclip, MoreVertical, X, Image as ImageIcon, Trash2, Ghost } from 'lucide-react';
 import { format } from 'date-fns';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
+import MessageBubble from '../components/MessageBubble';
+import GifPicker from '../components/GifPicker';
 
 const Messages = () => {
   const navigate = useNavigate();
@@ -20,6 +22,8 @@ const Messages = () => {
   const [searchResults, setSearchResults] = useState([]);
   const [isSearching, setIsSearching] = useState(false);
   const [files, setFiles] = useState([]);
+  const [editingMessage, setEditingMessage] = useState(null);
+  const [showGifPicker, setShowGifPicker] = useState(false);
   const fileInputRef = useRef(null);
   const messagesEndRef = useRef(null);
   const typingTimeoutRef = useRef(null);
@@ -44,6 +48,8 @@ const Messages = () => {
       socket.on('stop_typing', handleStopTyping);
       socket.on('message_delivered_ack', handleDeliveredAck);
       socket.on('messages_seen', handleSeenAck);
+      socket.on('message_edited', handleMessageEdited);
+      socket.on('message_deleted', handleMessageDeleted);
     }
     return () => {
       if (socket) {
@@ -52,6 +58,8 @@ const Messages = () => {
         socket.off('stop_typing', handleStopTyping);
         socket.off('message_delivered_ack', handleDeliveredAck);
         socket.off('messages_seen', handleSeenAck);
+        socket.off('message_edited', handleMessageEdited);
+        socket.off('message_deleted', handleMessageDeleted);
       }
     };
   }, [socket, activeConversation]);
@@ -104,6 +112,14 @@ const Messages = () => {
     }
   };
 
+  const handleMessageEdited = (updatedMsg) => {
+    setMessages(prev => prev.map(m => m._id === updatedMsg._id ? updatedMsg : m));
+  };
+
+  const handleMessageDeleted = ({ messageId }) => {
+    setMessages(prev => prev.map(m => m._id === messageId ? { ...m, isDeleted: true, text: '', media: [], gifUrl: null } : m));
+  };
+
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'auto' });
   };
@@ -141,6 +157,18 @@ const Messages = () => {
     e.preventDefault();
     if ((!text.trim() && files.length === 0) || !activeConversation) return;
 
+    if (editingMessage) {
+      try {
+        const res = await api.put(`/messages/msg/${editingMessage._id}`, { text });
+        setMessages(prev => prev.map(m => m._id === res.data._id ? res.data : m));
+        setEditingMessage(null);
+        setText('');
+      } catch (err) {
+        console.error(err);
+      }
+      return;
+    }
+
     const formData = new FormData();
     if (text.trim()) formData.append('text', text);
     files.forEach(f => formData.append('media', f));
@@ -162,6 +190,31 @@ const Messages = () => {
         if (prev.find(m => m._id === res.data._id)) return prev;
         return [...prev, res.data];
       });
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const cancelEdit = () => {
+    setEditingMessage(null);
+    setText('');
+  };
+
+  const handleGifSelect = async (gifUrl) => {
+    setShowGifPicker(false);
+    if (!activeConversation) return;
+
+    try {
+      const res = await api.post(`/messages/${activeConversation._id}`, { gifUrl });
+      setMessages(prev => {
+        if (prev.find(m => m._id === res.data._id)) return prev;
+        return [...prev, res.data];
+      });
+      // Emit socket for typing stop just in case
+      const otherParticipant = activeConversation.participants.find(p => p._id !== user.id);
+      if (socket && otherParticipant) {
+        socket.emit('stop_typing', { conversationId: activeConversation._id, recipientId: otherParticipant._id });
+      }
     } catch (err) {
       console.error(err);
     }
@@ -366,9 +419,11 @@ const Messages = () => {
                     </p>
                   </div>
                 </div>
-                <button className="p-2 text-brown-400 hover:bg-brown-50 rounded-full transition">
-                  <MoreVertical size={20} />
-                </button>
+                <div className="flex gap-2">
+                  <button onClick={deleteConversation} className="p-2 text-red-400 hover:bg-red-50 hover:text-red-600 rounded-full transition" title="Delete Conversation">
+                    <Trash2 size={20} />
+                  </button>
+                </div>
               </div>
 
               {/* Messages Body */}
@@ -392,56 +447,21 @@ const Messages = () => {
                   const showTime = idx === 0 || new Date(msg.createdAt) - new Date(messages[idx-1].createdAt) > 3600000; // 1 hour
 
                   return (
-                    <div key={msg._id} className="flex flex-col">
-                      {showTime && <p className="text-[10px] text-brown-400 text-center my-4">{format(new Date(msg.createdAt), 'MMM d, h:mm a')}</p>}
-                      <div className={`flex flex-col ${isMine ? 'items-end' : 'items-start'}`}>
-                        <div className={`flex gap-3 max-w-[70%] ${isMine ? 'flex-row-reverse' : 'flex-row'}`}>
-                          {!isMine && (
-                             <div className="w-8 shrink-0 flex items-end pb-1">
-                                {showAvatar && <Avatar src={msg.sender.profilePicture} fallback={msg.sender.firstName[0]} size="sm" />}
-                             </div>
-                          )}
-
-                          <div className={`flex flex-col gap-1 ${isMine ? 'items-end' : 'items-start'}`}>
-                            {msg.text && (
-                              <div className={`px-4 py-2.5 rounded-2xl text-[15px] ${isMine ? 'bg-brown-800 text-white rounded-br-sm shadow-sm' : 'bg-white border border-brown-200 text-brown-900 rounded-bl-sm shadow-sm'}`}>
-                                {msg.text}
-                              </div>
-                            )}
-
-                            {msg.media && msg.media.length > 0 && (
-                              <div className="flex flex-wrap gap-1 mt-1 max-w-[250px]">
-                                {msg.media.map((item, i) => (
-                                  <div key={i} className="rounded-lg overflow-hidden border border-brown-200 bg-white">
-                                    {item.type === 'image' ? (
-                                      <img src={item.url} alt="attachment" className="max-h-32 object-contain" />
-                                    ) : item.type === 'video' ? (
-                                      <video src={item.url} controls className="max-h-32 object-contain" />
-                                    ) : (
-                                      <a href={item.url} target="_blank" rel="noreferrer" className="block p-2 text-xs text-blue-600 underline">
-                                        View Attachment
-                                      </a>
-                                    )}
-                                  </div>
-                                ))}
-                              </div>
-                            )}
-
-                            {msg.linkPreview && (
-                              <a href={msg.linkPreview.url} target="_blank" rel="noopener noreferrer" className="block w-64 border border-brown-200 rounded-xl overflow-hidden bg-white mt-1 hover:opacity-90 shadow-sm">
-                                {msg.linkPreview.image && <img src={msg.linkPreview.image} alt="Preview" className="w-full h-32 object-cover" />}
-                                <div className="p-3">
-                                  <p className="text-sm font-bold text-brown-900 truncate">{msg.linkPreview.title}</p>
-                                  <p className="text-xs text-brown-500 line-clamp-2 mt-1">{msg.linkPreview.description}</p>
-                                </div>
-                              </a>
-                            )}
-                          </div>
-                        </div>
-
-                        {/* Read Receipts */}
-                        {isMine && idx === messages.length - 1 && (
-                          <div className="mt-1 mr-1">
+                    <div key={msg._id} className="flex flex-col relative">
+                       <MessageBubble
+                         msg={msg}
+                         isMine={isMine}
+                         showAvatar={showAvatar}
+                         showTime={showTime}
+                         activeOtherParticipant={activeOtherParticipant}
+                         onEditSelect={(m) => {
+                           setEditingMessage(m);
+                           setText(m.text);
+                         }}
+                       />
+                       {/* Read Receipts */}
+                       {isMine && idx === messages.length - 1 && !msg.isDeleted && (
+                          <div className="self-end mt-1 mr-1">
                             {msg.status === 'seen' && (
                               <img src={activeOtherParticipant?.profilePicture || 'default'} alt="Seen" className="w-4 h-4 rounded-full object-cover shadow-sm" onError={(e) => e.target.style.display='none'} />
                             )}
@@ -453,7 +473,6 @@ const Messages = () => {
                             )}
                           </div>
                         )}
-                      </div>
                     </div>
                   );
                 })}
@@ -475,7 +494,16 @@ const Messages = () => {
 
               {/* Input Area */}
               <div className="p-4 bg-white border-t border-brown-100 flex flex-col gap-2">
-                {files.length > 0 && (
+                {editingMessage && (
+                  <div className="flex items-center justify-between bg-brown-50 px-4 py-2 rounded-lg border border-brown-200">
+                    <div>
+                      <p className="text-xs font-bold text-brown-600">Editing message</p>
+                      <p className="text-sm text-brown-900 truncate max-w-md">{editingMessage.text}</p>
+                    </div>
+                    <button onClick={cancelEdit} className="p-1 hover:bg-brown-200 rounded-full text-brown-500"><X size={16} /></button>
+                  </div>
+                )}
+                {files.length > 0 && !editingMessage && (
                   <div className="flex gap-2 overflow-x-auto pb-2">
                     {files.map((file, i) => (
                       <div key={i} className="relative w-16 h-16 shrink-0 bg-brown-100 rounded-lg overflow-hidden border border-brown-200">
@@ -493,40 +521,48 @@ const Messages = () => {
                     ))}
                   </div>
                 )}
-                <form onSubmit={handleSend} className="flex items-end gap-3 bg-brown-50 rounded-2xl p-2 border border-brown-200">
-                  <input
-                    type="file"
-                    multiple
-                    ref={fileInputRef}
-                    onChange={handleFileChange}
-                    className="hidden"
-                    accept="image/*,video/*,.pdf,.doc,.docx"
-                  />
-                  <button type="button" onClick={() => fileInputRef.current?.click()} className="p-2 text-brown-400 hover:text-brown-700 hover:bg-brown-100 rounded-full transition">
-                    <Paperclip size={20} />
-                  </button>
-                  <textarea
-                    value={text}
-                    onChange={handleTextChange}
-                    placeholder="Message..."
-                    disabled={activeConversation.isRequest}
-                    className="flex-1 max-h-32 min-h-[40px] bg-transparent outline-none resize-none py-2 text-[15px] text-brown-900 placeholder:text-brown-400 disabled:opacity-50"
-                    rows={1}
-                    onKeyDown={(e) => {
-                      if (e.key === 'Enter' && !e.shiftKey) {
-                        e.preventDefault();
-                        handleSend(e);
-                      }
-                    }}
-                  />
-                  <button
-                    type="submit"
-                    disabled={(!text.trim() && files.length === 0) || activeConversation.isRequest}
-                    className="p-2 bg-brown-900 text-white hover:bg-brown-800 rounded-full transition disabled:opacity-50 disabled:bg-brown-200 disabled:text-brown-400"
-                  >
-                    <Send size={18} className="ml-0.5" />
-                  </button>
-                </form>
+                <div className="relative">
+                  <AnimatePresence>
+                    {showGifPicker && <GifPicker onSelect={handleGifSelect} onClose={() => setShowGifPicker(false)} />}
+                  </AnimatePresence>
+                  <form onSubmit={handleSend} className="flex items-end gap-3 bg-brown-50 rounded-2xl p-2 border border-brown-200">
+                    <input
+                      type="file"
+                      multiple
+                      ref={fileInputRef}
+                      onChange={handleFileChange}
+                      className="hidden"
+                      accept="image/*,video/*,.pdf,.doc,.docx"
+                    />
+                    <button type="button" onClick={() => fileInputRef.current?.click()} disabled={!!editingMessage} className="p-2 text-brown-400 hover:text-brown-700 hover:bg-brown-100 rounded-full transition disabled:opacity-50">
+                      <Paperclip size={20} />
+                    </button>
+                    <button type="button" onClick={() => setShowGifPicker(!showGifPicker)} disabled={!!editingMessage} className="p-2 text-brown-400 hover:text-brown-700 hover:bg-brown-100 rounded-full transition disabled:opacity-50">
+                      <div className="font-black text-[10px] border-2 border-current rounded px-1 flex items-center justify-center h-[18px]">GIF</div>
+                    </button>
+                    <textarea
+                      value={text}
+                      onChange={handleTextChange}
+                      placeholder="Message..."
+                      disabled={activeConversation.isRequest}
+                      className="flex-1 max-h-32 min-h-[40px] bg-transparent outline-none resize-none py-2 text-[15px] text-brown-900 placeholder:text-brown-400 disabled:opacity-50"
+                      rows={1}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter' && !e.shiftKey) {
+                          e.preventDefault();
+                          handleSend(e);
+                        }
+                      }}
+                    />
+                    <button
+                      type="submit"
+                      disabled={(!text.trim() && files.length === 0) || activeConversation.isRequest}
+                      className="p-2 bg-brown-900 text-white hover:bg-brown-800 rounded-full transition disabled:opacity-50 disabled:bg-brown-200 disabled:text-brown-400"
+                    >
+                      <Send size={18} className="ml-0.5" />
+                    </button>
+                  </form>
+                </div>
               </div>
             </>
           ) : (

@@ -16,5 +16,7 @@ router.delete('/conversations/:id', messageController.deleteConversation);
 router.get('/:conversationId', messageController.getMessages);
 router.post('/:conversationId', messageUpload.array('media', 5), messageController.sendMessage);
 router.put('/:conversationId/seen', messageController.markAsSeen);
+router.put('/msg/:messageId', messageController.editMessage);
+router.delete('/msg/:messageId', messageController.deleteMessage);
 
 module.exports = router;

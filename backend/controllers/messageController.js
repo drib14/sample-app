@@ -190,12 +190,15 @@ exports.sendMessage = async (req, res) => {
        // Let's set 'sent' and socket will upgrade it.
     }
 
+    const { gifUrl } = req.body;
+
     const message = new Message({
       conversationId,
       sender: req.user.id,
       text,
       media: mediaFiles,
       linkPreview,
+      gifUrl,
       status
     });
 
@@ -229,6 +232,92 @@ exports.sendMessage = async (req, res) => {
     }
 
     res.status(201).json(message);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Server error' });
+  }
+};
+
+exports.editMessage = async (req, res) => {
+  try {
+    const { text } = req.body;
+    const messageId = req.params.messageId;
+
+    const message = await Message.findOne({ _id: messageId, sender: req.user.id }).populate('sender', 'firstName lastName profilePicture');
+    if (!message) return res.status(404).json({ message: 'Message not found or unauthorized' });
+
+    if (message.isDeleted) return res.status(400).json({ message: 'Cannot edit a deleted message' });
+
+    message.text = text;
+    message.isEdited = true;
+
+    // Update link preview if needed
+    let linkPreview = null;
+    if (text) {
+      const urls = text.match(urlRegex);
+      if (urls && urls.length > 0) {
+        try {
+          const metadata = await urlMetadata(urls[0], { timeout: 3000 });
+          if (metadata && (metadata.title || metadata['og:title'])) {
+             linkPreview = {
+               title: metadata.title || metadata['og:title'] || '',
+               description: metadata.description || metadata['og:description'] || '',
+               image: metadata.image || metadata['og:image'] || null,
+               url: urls[0]
+             };
+          }
+        } catch (e) {
+          console.error("Link preview error:", e.message);
+        }
+      }
+    }
+    message.linkPreview = linkPreview;
+
+    await message.save();
+
+    const conversation = await Conversation.findById(message.conversationId);
+
+    // Emit socket
+    const io = socketIO.getIO();
+    if (io && conversation) {
+      conversation.participants.forEach(p => {
+        io.to(p.toString()).emit('message_edited', message);
+      });
+    }
+
+    res.status(200).json(message);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Server error' });
+  }
+};
+
+exports.deleteMessage = async (req, res) => {
+  try {
+    const messageId = req.params.messageId;
+
+    const message = await Message.findOne({ _id: messageId, sender: req.user.id });
+    if (!message) return res.status(404).json({ message: 'Message not found or unauthorized' });
+
+    // Soft delete
+    message.isDeleted = true;
+    message.text = '';
+    message.media = [];
+    message.gifUrl = null;
+    message.linkPreview = null;
+    await message.save();
+
+    const conversation = await Conversation.findById(message.conversationId);
+
+    // Emit socket
+    const io = socketIO.getIO();
+    if (io && conversation) {
+      conversation.participants.forEach(p => {
+        io.to(p.toString()).emit('message_deleted', { messageId, conversationId: conversation._id });
+      });
+    }
+
+    res.status(200).json({ messageId, conversationId: conversation._id });
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: 'Server error' });

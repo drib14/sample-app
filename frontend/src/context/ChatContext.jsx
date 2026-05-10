@@ -144,7 +144,7 @@ export const ChatProvider = ({ children }) => {
 
   const unreadCount = conversations.reduce((count, conv) => {
     if (conv.latestMessage &&
-        conv.latestMessage.sender._id !== user?.id &&
+        conv.latestMessage.sender?._id !== user?.id &&
         conv.latestMessage.status !== 'seen') {
       return count + 1;
     }

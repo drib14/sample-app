@@ -32,6 +32,10 @@ const messageSchema = new mongoose.Schema({
   // Track seen by array for future proofing group chats, but for 1-1 it's fine
   seenBy: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
 
+  gifUrl: { type: String, default: null },
+  isDeleted: { type: Boolean, default: false },
+  isEdited: { type: Boolean, default: false },
+
 }, { timestamps: true });
 
 module.exports = mongoose.model('Message', messageSchema);
