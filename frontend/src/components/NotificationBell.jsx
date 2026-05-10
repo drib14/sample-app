@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Bell } from 'lucide-react';
+import { Bell, Check, Trash2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import { formatDistanceToNow } from 'date-fns';
@@ -47,18 +47,33 @@ const NotificationBell = ({ user }) => {
     }
   };
 
-  const handleOpen = async () => {
+  const handleOpen = () => {
     setIsOpen(!isOpen);
-    if (!isOpen && unreadCount > 0) {
-      try {
-        await api.put('/notifications/read', {}, {
-          headers: { Authorization: `Bearer ${localStorage.getItem('makiToken')}` }
-        });
-        setUnreadCount(0);
-        setNotifications(prev => prev.map(n => ({ ...n, read: true })));
-      } catch (err) {
-        console.error(err);
-      }
+  };
+
+  const markAllAsRead = async () => {
+    if (unreadCount === 0) return;
+    try {
+      await api.put('/notifications/read', {}, {
+        headers: { Authorization: `Bearer ${localStorage.getItem('makiToken')}` }
+      });
+      setUnreadCount(0);
+      setNotifications(prev => prev.map(n => ({ ...n, read: true })));
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const deleteAllNotifications = async () => {
+    if (notifications.length === 0) return;
+    try {
+      await api.delete('/notifications', {
+        headers: { Authorization: `Bearer ${localStorage.getItem('makiToken')}` }
+      });
+      setNotifications([]);
+      setUnreadCount(0);
+    } catch (err) {
+      console.error(err);
     }
   };
 
@@ -95,8 +110,24 @@ const NotificationBell = ({ user }) => {
             exit={{ opacity: 0, y: 10, scale: 0.95 }}
             className="absolute right-0 mt-2 w-80 bg-white rounded-2xl shadow-xl border border-brown-100 overflow-hidden z-50"
           >
-            <div className="p-4 border-b border-brown-100 flex justify-between items-center bg-brown-50">
+            <div className="p-4 border-b border-brown-100 flex flex-col gap-2 bg-brown-50">
               <h3 className="font-bold text-brown-900">Notifications</h3>
+              <div className="flex justify-between items-center text-xs">
+                <button
+                  onClick={markAllAsRead}
+                  className="flex items-center gap-1 text-brown-500 hover:text-brown-700 transition-colors"
+                  disabled={unreadCount === 0}
+                >
+                  <Check size={12} /> Mark all read
+                </button>
+                <button
+                  onClick={deleteAllNotifications}
+                  className="flex items-center gap-1 text-red-400 hover:text-red-600 transition-colors"
+                  disabled={notifications.length === 0}
+                >
+                  <Trash2 size={12} /> Clear all
+                </button>
+              </div>
             </div>
             <div className="max-h-96 overflow-y-auto">
               {notifications.length === 0 ? (

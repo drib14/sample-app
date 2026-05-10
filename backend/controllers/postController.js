@@ -247,4 +247,33 @@ const getUserPosts = async (req, res) => {
   }
 };
 
-module.exports = { createPost, getFeed, updatePost, deletePost, reactToPost, votePoll, getUserPosts };
+const getUserMedia = async (req, res) => {
+  try {
+    const { username } = req.params;
+    const user = await User.findOne({ username });
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    const posts = await Post.find({ author: user._id, 'media.0': { $exists: true } })
+      .select('media createdAt')
+      .sort({ createdAt: -1 });
+
+    const media = [];
+    posts.forEach(post => {
+      post.media.forEach(item => {
+        media.push({
+          ...item.toObject(),
+          postId: post._id,
+          createdAt: post.createdAt
+        });
+      });
+    });
+
+    res.status(200).json(media);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+module.exports = { createPost, getFeed, updatePost, deletePost, reactToPost, votePoll, getUserPosts, getUserMedia };

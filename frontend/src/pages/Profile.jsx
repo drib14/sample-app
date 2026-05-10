@@ -15,6 +15,8 @@ const Profile = () => {
   const navigate = useNavigate();
   const [profileUser, setProfileUser] = useState(null);
   const [posts, setPosts] = useState([]);
+  const [media, setMedia] = useState([]);
+  const [friends, setFriends] = useState([]);
   const [loading, setLoading] = useState(true);
   const [currentUser, setCurrentUser] = useState(null);
 
@@ -37,15 +39,20 @@ const Profile = () => {
   const fetchProfileData = async () => {
     try {
       setLoading(true);
-      const userRes = await api.get(`/users/${username}`, {
-        headers: { Authorization: `Bearer ${localStorage.getItem('makiToken')}` }
-      });
+      const headers = { Authorization: `Bearer ${localStorage.getItem('makiToken')}` };
+
+      const userRes = await api.get(`/users/${username}`, { headers });
       setProfileUser(userRes.data);
 
-      const postsRes = await api.get(`/posts/user/${username}`, {
-        headers: { Authorization: `Bearer ${localStorage.getItem('makiToken')}` }
-      });
+      const postsRes = await api.get(`/posts/user/${username}`, { headers });
       setPosts(postsRes.data);
+
+      const mediaRes = await api.get(`/posts/user/${username}/media`, { headers });
+      setMedia(mediaRes.data);
+
+      const connectionsRes = await api.get(`/connections/${username}`, { headers });
+      setFriends(connectionsRes.data);
+
     } catch (err) {
       console.error('Failed to fetch profile data', err);
     } finally {
@@ -178,75 +185,65 @@ const Profile = () => {
             isEditable={isOwnProfile}
             onUpdate={handleProfileUpdated}
           />
-          <EditableProfileCard
-            title="Work"
-            icon={Briefcase}
-            field="work"
-            value={profileUser.work}
-            isEditable={isOwnProfile}
-            onUpdate={handleProfileUpdated}
-          />
-          <EditableProfileCard
-            title="Relationship Status"
-            icon={Heart}
-            field="relationshipStatus"
-            value={profileUser.relationshipStatus}
-            isEditable={isOwnProfile}
-            onUpdate={handleProfileUpdated}
-          />
-          <EditableProfileCard
-            title="Elementary School"
-            icon={BookOpen}
-            field="elementary"
-            value={profileUser.education?.elementary}
-            isEditable={isOwnProfile}
-            onUpdate={handleProfileUpdated}
-          />
-          <EditableProfileCard
-            title="High School"
-            icon={School}
-            field="highSchool"
-            value={profileUser.education?.highSchool}
-            isEditable={isOwnProfile}
-            onUpdate={handleProfileUpdated}
-          />
-          <AutocompleteProfileCard
-            title="College / University"
-            icon={GraduationCap}
-            field="college"
-            value={profileUser.education?.college}
-            isEditable={isOwnProfile}
-            onUpdate={handleProfileUpdated}
-          />
-          <EditableProfileCard
-            title="Location"
-            icon={MapPin}
-            field="address"
-            value={profileUser.address}
-            isEditable={isOwnProfile}
-            onUpdate={handleProfileUpdated}
-          />
 
-          {/* Read-only cards */}
-          <div className="bg-white rounded-2xl p-5 shadow-sm border border-brown-100 flex flex-col">
-            <div className="flex items-center gap-3 mb-3 text-brown-900 font-semibold">
-              <div className="p-2 bg-brown-50 rounded-lg text-brown-600">
-                <Clock size={20} />
-              </div>
-              Joined
-            </div>
-            <span className="text-brown-700 text-sm">{format(new Date(profileUser.createdAt), 'MMMM yyyy')}</span>
+          <Link to={`/profile/${username}/about`} className="block w-full text-center py-3 bg-white hover:bg-brown-50 border border-brown-100 rounded-xl font-bold text-brown-700 transition-colors shadow-sm">
+            See more info about {profileUser.firstName}
+          </Link>
+
+          {/* Media Section */}
+          <div className="bg-white rounded-2xl p-6 shadow-sm border border-brown-100">
+             <h3 className="font-bold text-brown-900 mb-4 flex items-center justify-between">
+               Photos & Videos
+               <span className="text-sm font-normal text-brown-500">{media.length} items</span>
+             </h3>
+             {media.length > 0 ? (
+               <div className="grid grid-cols-3 gap-2">
+                 {media.slice(0, 9).map((m, i) => (
+                   <div key={i} className="aspect-square bg-brown-100 rounded-lg overflow-hidden relative">
+                     {m.type === 'image' ? (
+                       <img src={m.url} alt="Media" className="w-full h-full object-cover" />
+                     ) : (
+                       <video src={m.url} className="w-full h-full object-cover" />
+                     )}
+                   </div>
+                 ))}
+               </div>
+             ) : (
+               <p className="text-sm text-brown-500 text-center py-4">No media available.</p>
+             )}
           </div>
 
-          <div className="bg-white rounded-2xl p-5 shadow-sm border border-brown-100 flex flex-col">
-            <div className="flex items-center gap-3 mb-3 text-brown-900 font-semibold">
-              <div className="p-2 bg-brown-50 rounded-lg text-brown-600">
-                <Calendar size={20} />
-              </div>
-              Birthday
-            </div>
-            <span className="text-brown-700 text-sm">{format(new Date(profileUser.dob), 'MMM d, yyyy')}</span>
+          {/* Connections Section */}
+          <div className="bg-white rounded-2xl p-6 shadow-sm border border-brown-100">
+             <h3 className="font-bold text-brown-900 mb-4 flex items-center justify-between">
+               Connections
+               <span className="text-sm font-normal text-brown-500">{friends.length} friends</span>
+             </h3>
+             {friends.length > 0 ? (
+               <div className="flex overflow-x-auto gap-4 pb-2 custom-scrollbar">
+                 {friends.map(friend => (
+                   <Link key={friend._id} to={`/profile/${friend.username}`} className="flex flex-col items-center gap-2 min-w-[80px]">
+                     <div className="relative">
+                       {friend.profilePicture ? (
+                         <img src={friend.profilePicture} alt="Friend" className="w-16 h-16 rounded-full object-cover border border-brown-100" />
+                       ) : (
+                         <div className="w-16 h-16 bg-brown-200 rounded-full flex items-center justify-center font-bold text-brown-600 text-xl border border-brown-100">
+                           {friend.firstName[0]}{friend.lastName[0]}
+                         </div>
+                       )}
+                       {friend.isOnline && (
+                         <div className="absolute bottom-0 right-0 w-3 h-3 bg-green-500 rounded-full border-2 border-white"></div>
+                       )}
+                     </div>
+                     <span className="text-xs font-semibold text-brown-800 truncate w-full text-center">{friend.firstName}</span>
+                   </Link>
+                 ))}
+               </div>
+             ) : (
+               <p className="text-sm text-brown-500 text-center py-4">No connections yet.</p>
+             )}
           </div>
+
         </div>
 
         {/* Center/Right Column: User's Posts */}

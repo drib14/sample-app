@@ -16,7 +16,11 @@ module.exports = {
       console.log('Client connected:', socket.id);
       let currentUserId = null;
 
+      // For a more secure app, we should decode the jwt token passed during connection
+      // For now, to solve CastError artifacts when ID is mock ("user123"), validate the ID
       socket.on('join_user_room', async (userId) => {
+        if (!userId || userId.length !== 24) return;
+
         socket.join(userId);
         currentUserId = userId;
         console.log(`User ${userId} joined their room`);

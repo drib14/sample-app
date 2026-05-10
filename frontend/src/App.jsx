@@ -6,6 +6,7 @@ import Login from './pages/Login';
 import Locked from './pages/Locked';
 import Dashboard from './pages/Dashboard';
 import Profile from './pages/Profile';
+import ProfileAbout from './pages/ProfileAbout';
 import socket from './utils/socket';
 import { useEffect } from 'react';
 
@@ -41,6 +42,7 @@ function App() {
           <Route path="/locked" element={<Locked />} />
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/profile/:username" element={<Profile />} />
+          <Route path="/profile/:username/about" element={<ProfileAbout />} />
           <Route path="/" element={<Login />} />
         </Routes>
       </Router>

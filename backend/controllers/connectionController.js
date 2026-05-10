@@ -70,4 +70,28 @@ const verifyCode = async (req, res) => {
   }
 };
 
-module.exports = { generateCode, verifyCode };
+const User = require('../models/User');
+
+const getUserConnections = async (req, res) => {
+  try {
+    const { username } = req.params;
+    const user = await User.findOne({ username });
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    const connections = await Connection.find({ users: user._id })
+      .populate('users', 'firstName lastName username profilePicture isOnline');
+
+    // Filter out the requested user to just return their connected friends
+    const friends = connections.map(conn => {
+      return conn.users.find(u => u._id.toString() !== user._id.toString());
+    }).filter(Boolean); // Filter out any nulls if something went wrong
+
+    res.status(200).json(friends);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+module.exports = { generateCode, verifyCode, getUserConnections };
