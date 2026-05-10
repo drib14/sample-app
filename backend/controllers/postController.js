@@ -1,5 +1,8 @@
 const Post = require('../models/Post');
 const Comment = require('../models/Comment');
+const User = require('../models/User');
+const Notification = require('../models/Notification');
+const socket = require('../socket');
 
 const createPost = async (req, res) => {
   try {
@@ -51,6 +54,29 @@ const createPost = async (req, res) => {
       .populate('reactions.user', 'firstName lastName profilePicture username')
       .populate('tags', 'firstName lastName username profilePicture');
 
+    // Notify tagged users
+    if (tags && tags.length > 0) {
+      for (const taggedUserId of tags) {
+        if (taggedUserId.toString() !== req.user.id) {
+          const notification = new Notification({
+            recipient: taggedUserId,
+            sender: req.user.id,
+            type: 'mention',
+            post: newPost._id
+          });
+          await notification.save();
+          const popNotif = await Notification.findById(notification._id)
+            .populate('sender', 'firstName lastName username profilePicture')
+            .populate('post', 'content');
+          try {
+            socket.getIO().to(taggedUserId.toString()).emit('new_notification', popNotif);
+          } catch (e) {
+            console.log('Socket error', e);
+          }
+        }
+      }
+    }
+
     res.status(201).json(populatedPost);
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -60,7 +86,7 @@ const createPost = async (req, res) => {
 const getFeed = async (req, res) => {
   try {
     const posts = await Post.find()
-      .populate('author', 'firstName lastName username profilePicture')
+      .populate('author', 'firstName lastName username profilePicture isOnline')
       .populate('reactions.user', 'firstName lastName profilePicture username')
       .populate('tags', 'firstName lastName username profilePicture')
       .sort({ createdAt: -1 });
@@ -86,7 +112,7 @@ const updatePost = async (req, res) => {
     await post.save();
 
     const populatedPost = await Post.findById(id)
-      .populate('author', 'firstName lastName username profilePicture')
+      .populate('author', 'firstName lastName username profilePicture isOnline')
       .populate('reactions.user', 'firstName lastName profilePicture username')
       .populate('tags', 'firstName lastName username profilePicture');
 
@@ -109,6 +135,13 @@ const deletePost = async (req, res) => {
 
     await Post.findByIdAndDelete(id);
     await Comment.deleteMany({ post: id });
+
+    // Emit socket event to update clients
+    try {
+      socket.getIO().emit('post_deleted', id);
+    } catch (e) {
+      console.log('Socket not ready');
+    }
 
     res.status(200).json({ message: 'Post deleted successfully' });
   } catch (error) {
@@ -141,6 +174,25 @@ const reactToPost = async (req, res) => {
     await post.save();
 
     const populatedPost = await Post.findById(id).populate('reactions.user', 'firstName lastName profilePicture username');
+
+    // Notification for like
+    if (existingReactionIndex === -1 && post.author.toString() !== userId) {
+      const notification = new Notification({
+        recipient: post.author,
+        sender: userId,
+        type: 'like',
+        post: id
+      });
+      await notification.save();
+      const popNotif = await Notification.findById(notification._id)
+        .populate('sender', 'firstName lastName username profilePicture')
+        .populate('post', 'content');
+      try {
+        socket.getIO().to(post.author.toString()).emit('new_notification', popNotif);
+      } catch (e) {
+        console.log('Socket error', e);
+      }
+    }
 
     res.status(200).json(populatedPost.reactions);
   } catch (error) {
@@ -175,4 +227,70 @@ const votePoll = async (req, res) => {
   }
 };
 
-module.exports = { createPost, getFeed, updatePost, deletePost, reactToPost, votePoll };
+const getUserPosts = async (req, res) => {
+  try {
+    const { username } = req.params;
+    const user = await User.findOne({ username });
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    const posts = await Post.find({ author: user._id })
+      .populate('author', 'firstName lastName username profilePicture isOnline')
+      .populate('reactions.user', 'firstName lastName profilePicture username')
+      .populate('tags', 'firstName lastName username profilePicture')
+      .sort({ createdAt: -1 });
+
+    res.status(200).json(posts);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+const getUserMedia = async (req, res) => {
+  try {
+    const { username } = req.params;
+    const user = await User.findOne({ username });
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    const posts = await Post.find({ author: user._id, 'media.0': { $exists: true } })
+      .select('media createdAt')
+      .sort({ createdAt: -1 });
+
+    const media = [];
+    posts.forEach(post => {
+      post.media.forEach(item => {
+        media.push({
+          ...item.toObject(),
+          postId: post._id,
+          createdAt: post.createdAt
+        });
+      });
+    });
+
+    res.status(200).json(media);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+const getPostById = async (req, res) => {
+  try {
+    const post = await Post.findById(req.params.id)
+      .populate('author', 'firstName lastName username profilePicture isOnline')
+      .populate('reactions.user', 'firstName lastName profilePicture username')
+      .populate('tags', 'firstName lastName username profilePicture');
+
+    if (!post) {
+      return res.status(404).json({ message: 'Post not found' });
+    }
+
+    res.status(200).json(post);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+module.exports = { createPost, getFeed, updatePost, deletePost, reactToPost, votePoll, getUserPosts, getUserMedia, getPostById };

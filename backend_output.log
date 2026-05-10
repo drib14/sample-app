@@ -1,0 +1,307 @@
+◇ injected env (0) from .env // tip: ⌘ enable debugging { debug: true }
+Server is running on port 5000
+MongoDB connection error: MongooseServerSelectionError: connect ECONNREFUSED 127.0.0.1:27017
+    at _handleConnectionErrors (/app/backend/node_modules/mongoose/lib/connection.js:1180:11)
+    at NativeConnection.openUri (/app/backend/node_modules/mongoose/lib/connection.js:1111:11) {
+  errorLabelSet: Set(0) {},
+  reason: TopologyDescription {
+    type: 'Unknown',
+    servers: Map(1) { '127.0.0.1:27017' => [ServerDescription] },
+    stale: false,
+    compatible: true,
+    heartbeatFrequencyMS: 10000,
+    localThresholdMS: 15,
+    setName: null,
+    maxElectionId: null,
+    maxSetVersion: null,
+    commonWireVersion: 0,
+    logicalSessionTimeoutMinutes: null
+  },
+  code: undefined,
+  cause: TopologyDescription {
+    type: 'Unknown',
+    servers: Map(1) { '127.0.0.1:27017' => [ServerDescription] },
+    stale: false,
+    compatible: true,
+    heartbeatFrequencyMS: 10000,
+    localThresholdMS: 15,
+    setName: null,
+    maxElectionId: null,
+    maxSetVersion: null,
+    commonWireVersion: 0,
+    logicalSessionTimeoutMinutes: null
+  }
+}
+Client connected: hDPj0mzApQKczCjhAAAC
+User user123 joined their room
+Error setting user online status CastError: Cast to ObjectId failed for value "user123" (type string) at path "_id" for model "User"
+    at SchemaObjectId.cast (/app/backend/node_modules/mongoose/lib/schema/objectId.js:252:11)
+    at SchemaType.applySetters (/app/backend/node_modules/mongoose/lib/schemaType.js:1372:12)
+    at SchemaType.castForQuery (/app/backend/node_modules/mongoose/lib/schemaType.js:1798:17)
+    at cast (/app/backend/node_modules/mongoose/lib/cast.js:386:32)
+    at Query.cast (/app/backend/node_modules/mongoose/lib/query.js:5212:12)
+    at Query._castConditions (/app/backend/node_modules/mongoose/lib/query.js:2409:10)
+    at model.Query._findOneAndUpdate (/app/backend/node_modules/mongoose/lib/query.js:3555:8)
+    at model.Query.exec (/app/backend/node_modules/mongoose/lib/query.js:4797:80)
+    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+    at async Socket.<anonymous> (/app/backend/socket.js:25:11) {
+  stringValue: '"user123"',
+  messageFormat: undefined,
+  kind: 'ObjectId',
+  value: 'user123',
+  path: '_id',
+  reason: BSONError: input must be a 24 character hex string, 12 byte Uint8Array, or an integer
+      at new ObjectId (/app/backend/node_modules/bson/lib/bson.cjs:2636:23)
+      at castObjectId (/app/backend/node_modules/mongoose/lib/cast/objectid.js:25:12)
+      at SchemaObjectId.cast (/app/backend/node_modules/mongoose/lib/schema/objectId.js:250:12)
+      at SchemaType.applySetters (/app/backend/node_modules/mongoose/lib/schemaType.js:1372:12)
+      at SchemaType.castForQuery (/app/backend/node_modules/mongoose/lib/schemaType.js:1798:17)
+      at cast (/app/backend/node_modules/mongoose/lib/cast.js:386:32)
+      at Query.cast (/app/backend/node_modules/mongoose/lib/query.js:5212:12)
+      at Query._castConditions (/app/backend/node_modules/mongoose/lib/query.js:2409:10)
+      at model.Query._findOneAndUpdate (/app/backend/node_modules/mongoose/lib/query.js:3555:8)
+      at model.Query.exec (/app/backend/node_modules/mongoose/lib/query.js:4797:80),
+  valueType: 'string'
+}
+User user123 joined their room
+Error setting user online status CastError: Cast to ObjectId failed for value "user123" (type string) at path "_id" for model "User"
+    at SchemaObjectId.cast (/app/backend/node_modules/mongoose/lib/schema/objectId.js:252:11)
+    at SchemaType.applySetters (/app/backend/node_modules/mongoose/lib/schemaType.js:1372:12)
+    at SchemaType.castForQuery (/app/backend/node_modules/mongoose/lib/schemaType.js:1798:17)
+    at cast (/app/backend/node_modules/mongoose/lib/cast.js:386:32)
+    at Query.cast (/app/backend/node_modules/mongoose/lib/query.js:5212:12)
+    at Query._castConditions (/app/backend/node_modules/mongoose/lib/query.js:2409:10)
+    at model.Query._findOneAndUpdate (/app/backend/node_modules/mongoose/lib/query.js:3555:8)
+    at model.Query.exec (/app/backend/node_modules/mongoose/lib/query.js:4797:80)
+    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+    at async Socket.<anonymous> (/app/backend/socket.js:25:11) {
+  stringValue: '"user123"',
+  messageFormat: undefined,
+  kind: 'ObjectId',
+  value: 'user123',
+  path: '_id',
+  reason: BSONError: input must be a 24 character hex string, 12 byte Uint8Array, or an integer
+      at new ObjectId (/app/backend/node_modules/bson/lib/bson.cjs:2636:23)
+      at castObjectId (/app/backend/node_modules/mongoose/lib/cast/objectid.js:25:12)
+      at SchemaObjectId.cast (/app/backend/node_modules/mongoose/lib/schema/objectId.js:250:12)
+      at SchemaType.applySetters (/app/backend/node_modules/mongoose/lib/schemaType.js:1372:12)
+      at SchemaType.castForQuery (/app/backend/node_modules/mongoose/lib/schemaType.js:1798:17)
+      at cast (/app/backend/node_modules/mongoose/lib/cast.js:386:32)
+      at Query.cast (/app/backend/node_modules/mongoose/lib/query.js:5212:12)
+      at Query._castConditions (/app/backend/node_modules/mongoose/lib/query.js:2409:10)
+      at model.Query._findOneAndUpdate (/app/backend/node_modules/mongoose/lib/query.js:3555:8)
+      at model.Query.exec (/app/backend/node_modules/mongoose/lib/query.js:4797:80),
+  valueType: 'string'
+}
+Client disconnected: hDPj0mzApQKczCjhAAAC
+Error setting user offline status CastError: Cast to ObjectId failed for value "user123" (type string) at path "_id" for model "User"
+    at SchemaObjectId.cast (/app/backend/node_modules/mongoose/lib/schema/objectId.js:252:11)
+    at SchemaType.applySetters (/app/backend/node_modules/mongoose/lib/schemaType.js:1372:12)
+    at SchemaType.castForQuery (/app/backend/node_modules/mongoose/lib/schemaType.js:1798:17)
+    at cast (/app/backend/node_modules/mongoose/lib/cast.js:386:32)
+    at Query.cast (/app/backend/node_modules/mongoose/lib/query.js:5212:12)
+    at Query._castConditions (/app/backend/node_modules/mongoose/lib/query.js:2409:10)
+    at model.Query._findOneAndUpdate (/app/backend/node_modules/mongoose/lib/query.js:3555:8)
+    at model.Query.exec (/app/backend/node_modules/mongoose/lib/query.js:4797:80)
+    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+    at async Socket.<anonymous> (/app/backend/socket.js:36:13) {
+  stringValue: '"user123"',
+  messageFormat: undefined,
+  kind: 'ObjectId',
+  value: 'user123',
+  path: '_id',
+  reason: BSONError: input must be a 24 character hex string, 12 byte Uint8Array, or an integer
+      at new ObjectId (/app/backend/node_modules/bson/lib/bson.cjs:2636:23)
+      at castObjectId (/app/backend/node_modules/mongoose/lib/cast/objectid.js:25:12)
+      at SchemaObjectId.cast (/app/backend/node_modules/mongoose/lib/schema/objectId.js:250:12)
+      at SchemaType.applySetters (/app/backend/node_modules/mongoose/lib/schemaType.js:1372:12)
+      at SchemaType.castForQuery (/app/backend/node_modules/mongoose/lib/schemaType.js:1798:17)
+      at cast (/app/backend/node_modules/mongoose/lib/cast.js:386:32)
+      at Query.cast (/app/backend/node_modules/mongoose/lib/query.js:5212:12)
+      at Query._castConditions (/app/backend/node_modules/mongoose/lib/query.js:2409:10)
+      at model.Query._findOneAndUpdate (/app/backend/node_modules/mongoose/lib/query.js:3555:8)
+      at model.Query.exec (/app/backend/node_modules/mongoose/lib/query.js:4797:80),
+  valueType: 'string'
+}
+Client connected: M135z0Dh23HFO5qXAAAE
+User user123 joined their room
+Error setting user online status CastError: Cast to ObjectId failed for value "user123" (type string) at path "_id" for model "User"
+    at SchemaObjectId.cast (/app/backend/node_modules/mongoose/lib/schema/objectId.js:252:11)
+    at SchemaType.applySetters (/app/backend/node_modules/mongoose/lib/schemaType.js:1372:12)
+    at SchemaType.castForQuery (/app/backend/node_modules/mongoose/lib/schemaType.js:1798:17)
+    at cast (/app/backend/node_modules/mongoose/lib/cast.js:386:32)
+    at Query.cast (/app/backend/node_modules/mongoose/lib/query.js:5212:12)
+    at Query._castConditions (/app/backend/node_modules/mongoose/lib/query.js:2409:10)
+    at model.Query._findOneAndUpdate (/app/backend/node_modules/mongoose/lib/query.js:3555:8)
+    at model.Query.exec (/app/backend/node_modules/mongoose/lib/query.js:4797:80)
+    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+    at async Socket.<anonymous> (/app/backend/socket.js:25:11) {
+  stringValue: '"user123"',
+  messageFormat: undefined,
+  kind: 'ObjectId',
+  value: 'user123',
+  path: '_id',
+  reason: BSONError: input must be a 24 character hex string, 12 byte Uint8Array, or an integer
+      at new ObjectId (/app/backend/node_modules/bson/lib/bson.cjs:2636:23)
+      at castObjectId (/app/backend/node_modules/mongoose/lib/cast/objectid.js:25:12)
+      at SchemaObjectId.cast (/app/backend/node_modules/mongoose/lib/schema/objectId.js:250:12)
+      at SchemaType.applySetters (/app/backend/node_modules/mongoose/lib/schemaType.js:1372:12)
+      at SchemaType.castForQuery (/app/backend/node_modules/mongoose/lib/schemaType.js:1798:17)
+      at cast (/app/backend/node_modules/mongoose/lib/cast.js:386:32)
+      at Query.cast (/app/backend/node_modules/mongoose/lib/query.js:5212:12)
+      at Query._castConditions (/app/backend/node_modules/mongoose/lib/query.js:2409:10)
+      at model.Query._findOneAndUpdate (/app/backend/node_modules/mongoose/lib/query.js:3555:8)
+      at model.Query.exec (/app/backend/node_modules/mongoose/lib/query.js:4797:80),
+  valueType: 'string'
+}
+User user123 joined their room
+Error setting user online status CastError: Cast to ObjectId failed for value "user123" (type string) at path "_id" for model "User"
+    at SchemaObjectId.cast (/app/backend/node_modules/mongoose/lib/schema/objectId.js:252:11)
+    at SchemaType.applySetters (/app/backend/node_modules/mongoose/lib/schemaType.js:1372:12)
+    at SchemaType.castForQuery (/app/backend/node_modules/mongoose/lib/schemaType.js:1798:17)
+    at cast (/app/backend/node_modules/mongoose/lib/cast.js:386:32)
+    at Query.cast (/app/backend/node_modules/mongoose/lib/query.js:5212:12)
+    at Query._castConditions (/app/backend/node_modules/mongoose/lib/query.js:2409:10)
+    at model.Query._findOneAndUpdate (/app/backend/node_modules/mongoose/lib/query.js:3555:8)
+    at model.Query.exec (/app/backend/node_modules/mongoose/lib/query.js:4797:80)
+    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+    at async Socket.<anonymous> (/app/backend/socket.js:25:11) {
+  stringValue: '"user123"',
+  messageFormat: undefined,
+  kind: 'ObjectId',
+  value: 'user123',
+  path: '_id',
+  reason: BSONError: input must be a 24 character hex string, 12 byte Uint8Array, or an integer
+      at new ObjectId (/app/backend/node_modules/bson/lib/bson.cjs:2636:23)
+      at castObjectId (/app/backend/node_modules/mongoose/lib/cast/objectid.js:25:12)
+      at SchemaObjectId.cast (/app/backend/node_modules/mongoose/lib/schema/objectId.js:250:12)
+      at SchemaType.applySetters (/app/backend/node_modules/mongoose/lib/schemaType.js:1372:12)
+      at SchemaType.castForQuery (/app/backend/node_modules/mongoose/lib/schemaType.js:1798:17)
+      at cast (/app/backend/node_modules/mongoose/lib/cast.js:386:32)
+      at Query.cast (/app/backend/node_modules/mongoose/lib/query.js:5212:12)
+      at Query._castConditions (/app/backend/node_modules/mongoose/lib/query.js:2409:10)
+      at model.Query._findOneAndUpdate (/app/backend/node_modules/mongoose/lib/query.js:3555:8)
+      at model.Query.exec (/app/backend/node_modules/mongoose/lib/query.js:4797:80),
+  valueType: 'string'
+}
+Client disconnected: M135z0Dh23HFO5qXAAAE
+Error setting user offline status CastError: Cast to ObjectId failed for value "user123" (type string) at path "_id" for model "User"
+    at SchemaObjectId.cast (/app/backend/node_modules/mongoose/lib/schema/objectId.js:252:11)
+    at SchemaType.applySetters (/app/backend/node_modules/mongoose/lib/schemaType.js:1372:12)
+    at SchemaType.castForQuery (/app/backend/node_modules/mongoose/lib/schemaType.js:1798:17)
+    at cast (/app/backend/node_modules/mongoose/lib/cast.js:386:32)
+    at Query.cast (/app/backend/node_modules/mongoose/lib/query.js:5212:12)
+    at Query._castConditions (/app/backend/node_modules/mongoose/lib/query.js:2409:10)
+    at model.Query._findOneAndUpdate (/app/backend/node_modules/mongoose/lib/query.js:3555:8)
+    at model.Query.exec (/app/backend/node_modules/mongoose/lib/query.js:4797:80)
+    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+    at async Socket.<anonymous> (/app/backend/socket.js:36:13) {
+  stringValue: '"user123"',
+  messageFormat: undefined,
+  kind: 'ObjectId',
+  value: 'user123',
+  path: '_id',
+  reason: BSONError: input must be a 24 character hex string, 12 byte Uint8Array, or an integer
+      at new ObjectId (/app/backend/node_modules/bson/lib/bson.cjs:2636:23)
+      at castObjectId (/app/backend/node_modules/mongoose/lib/cast/objectid.js:25:12)
+      at SchemaObjectId.cast (/app/backend/node_modules/mongoose/lib/schema/objectId.js:250:12)
+      at SchemaType.applySetters (/app/backend/node_modules/mongoose/lib/schemaType.js:1372:12)
+      at SchemaType.castForQuery (/app/backend/node_modules/mongoose/lib/schemaType.js:1798:17)
+      at cast (/app/backend/node_modules/mongoose/lib/cast.js:386:32)
+      at Query.cast (/app/backend/node_modules/mongoose/lib/query.js:5212:12)
+      at Query._castConditions (/app/backend/node_modules/mongoose/lib/query.js:2409:10)
+      at model.Query._findOneAndUpdate (/app/backend/node_modules/mongoose/lib/query.js:3555:8)
+      at model.Query.exec (/app/backend/node_modules/mongoose/lib/query.js:4797:80),
+  valueType: 'string'
+}
+Client connected: yKvzkehyKt5mQSmNAAAG
+User user123 joined their room
+User user123 joined their room
+Error setting user online status CastError: Cast to ObjectId failed for value "user123" (type string) at path "_id" for model "User"
+    at SchemaObjectId.cast (/app/backend/node_modules/mongoose/lib/schema/objectId.js:252:11)
+    at SchemaType.applySetters (/app/backend/node_modules/mongoose/lib/schemaType.js:1372:12)
+    at SchemaType.castForQuery (/app/backend/node_modules/mongoose/lib/schemaType.js:1798:17)
+    at cast (/app/backend/node_modules/mongoose/lib/cast.js:386:32)
+    at Query.cast (/app/backend/node_modules/mongoose/lib/query.js:5212:12)
+    at Query._castConditions (/app/backend/node_modules/mongoose/lib/query.js:2409:10)
+    at model.Query._findOneAndUpdate (/app/backend/node_modules/mongoose/lib/query.js:3555:8)
+    at model.Query.exec (/app/backend/node_modules/mongoose/lib/query.js:4797:80)
+    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+    at async Socket.<anonymous> (/app/backend/socket.js:25:11) {
+  stringValue: '"user123"',
+  messageFormat: undefined,
+  kind: 'ObjectId',
+  value: 'user123',
+  path: '_id',
+  reason: BSONError: input must be a 24 character hex string, 12 byte Uint8Array, or an integer
+      at new ObjectId (/app/backend/node_modules/bson/lib/bson.cjs:2636:23)
+      at castObjectId (/app/backend/node_modules/mongoose/lib/cast/objectid.js:25:12)
+      at SchemaObjectId.cast (/app/backend/node_modules/mongoose/lib/schema/objectId.js:250:12)
+      at SchemaType.applySetters (/app/backend/node_modules/mongoose/lib/schemaType.js:1372:12)
+      at SchemaType.castForQuery (/app/backend/node_modules/mongoose/lib/schemaType.js:1798:17)
+      at cast (/app/backend/node_modules/mongoose/lib/cast.js:386:32)
+      at Query.cast (/app/backend/node_modules/mongoose/lib/query.js:5212:12)
+      at Query._castConditions (/app/backend/node_modules/mongoose/lib/query.js:2409:10)
+      at model.Query._findOneAndUpdate (/app/backend/node_modules/mongoose/lib/query.js:3555:8)
+      at model.Query.exec (/app/backend/node_modules/mongoose/lib/query.js:4797:80),
+  valueType: 'string'
+}
+Error setting user online status CastError: Cast to ObjectId failed for value "user123" (type string) at path "_id" for model "User"
+    at SchemaObjectId.cast (/app/backend/node_modules/mongoose/lib/schema/objectId.js:252:11)
+    at SchemaType.applySetters (/app/backend/node_modules/mongoose/lib/schemaType.js:1372:12)
+    at SchemaType.castForQuery (/app/backend/node_modules/mongoose/lib/schemaType.js:1798:17)
+    at cast (/app/backend/node_modules/mongoose/lib/cast.js:386:32)
+    at Query.cast (/app/backend/node_modules/mongoose/lib/query.js:5212:12)
+    at Query._castConditions (/app/backend/node_modules/mongoose/lib/query.js:2409:10)
+    at model.Query._findOneAndUpdate (/app/backend/node_modules/mongoose/lib/query.js:3555:8)
+    at model.Query.exec (/app/backend/node_modules/mongoose/lib/query.js:4797:80)
+    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+    at async Socket.<anonymous> (/app/backend/socket.js:25:11) {
+  stringValue: '"user123"',
+  messageFormat: undefined,
+  kind: 'ObjectId',
+  value: 'user123',
+  path: '_id',
+  reason: BSONError: input must be a 24 character hex string, 12 byte Uint8Array, or an integer
+      at new ObjectId (/app/backend/node_modules/bson/lib/bson.cjs:2636:23)
+      at castObjectId (/app/backend/node_modules/mongoose/lib/cast/objectid.js:25:12)
+      at SchemaObjectId.cast (/app/backend/node_modules/mongoose/lib/schema/objectId.js:250:12)
+      at SchemaType.applySetters (/app/backend/node_modules/mongoose/lib/schemaType.js:1372:12)
+      at SchemaType.castForQuery (/app/backend/node_modules/mongoose/lib/schemaType.js:1798:17)
+      at cast (/app/backend/node_modules/mongoose/lib/cast.js:386:32)
+      at Query.cast (/app/backend/node_modules/mongoose/lib/query.js:5212:12)
+      at Query._castConditions (/app/backend/node_modules/mongoose/lib/query.js:2409:10)
+      at model.Query._findOneAndUpdate (/app/backend/node_modules/mongoose/lib/query.js:3555:8)
+      at model.Query.exec (/app/backend/node_modules/mongoose/lib/query.js:4797:80),
+  valueType: 'string'
+}
+Client disconnected: yKvzkehyKt5mQSmNAAAG
+Error setting user offline status CastError: Cast to ObjectId failed for value "user123" (type string) at path "_id" for model "User"
+    at SchemaObjectId.cast (/app/backend/node_modules/mongoose/lib/schema/objectId.js:252:11)
+    at SchemaType.applySetters (/app/backend/node_modules/mongoose/lib/schemaType.js:1372:12)
+    at SchemaType.castForQuery (/app/backend/node_modules/mongoose/lib/schemaType.js:1798:17)
+    at cast (/app/backend/node_modules/mongoose/lib/cast.js:386:32)
+    at Query.cast (/app/backend/node_modules/mongoose/lib/query.js:5212:12)
+    at Query._castConditions (/app/backend/node_modules/mongoose/lib/query.js:2409:10)
+    at model.Query._findOneAndUpdate (/app/backend/node_modules/mongoose/lib/query.js:3555:8)
+    at model.Query.exec (/app/backend/node_modules/mongoose/lib/query.js:4797:80)
+    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+    at async Socket.<anonymous> (/app/backend/socket.js:36:13) {
+  stringValue: '"user123"',
+  messageFormat: undefined,
+  kind: 'ObjectId',
+  value: 'user123',
+  path: '_id',
+  reason: BSONError: input must be a 24 character hex string, 12 byte Uint8Array, or an integer
+      at new ObjectId (/app/backend/node_modules/bson/lib/bson.cjs:2636:23)
+      at castObjectId (/app/backend/node_modules/mongoose/lib/cast/objectid.js:25:12)
+      at SchemaObjectId.cast (/app/backend/node_modules/mongoose/lib/schema/objectId.js:250:12)
+      at SchemaType.applySetters (/app/backend/node_modules/mongoose/lib/schemaType.js:1372:12)
+      at SchemaType.castForQuery (/app/backend/node_modules/mongoose/lib/schemaType.js:1798:17)
+      at cast (/app/backend/node_modules/mongoose/lib/cast.js:386:32)
+      at Query.cast (/app/backend/node_modules/mongoose/lib/query.js:5212:12)
+      at Query._castConditions (/app/backend/node_modules/mongoose/lib/query.js:2409:10)
+      at model.Query._findOneAndUpdate (/app/backend/node_modules/mongoose/lib/query.js:3555:8)
+      at model.Query.exec (/app/backend/node_modules/mongoose/lib/query.js:4797:80),
+  valueType: 'string'
+}

@@ -1,0 +1,49 @@
+
+> frontend@0.0.0 dev
+> vite
+
+
+  VITE v8.0.11  ready in 441 ms
+
+  ➜  Local:   http://localhost:5173/
+  ➜  Network: use --host to expose
+12:09:03 AM [vite] (client) [optimizer] bundling dependencies...
+12:46:22 AM [vite] (client) hmr update /src/index.css, /src/pages/Dashboard.jsx
+12:46:30 AM [vite] (client) hmr update /src/index.css, /src/pages/Dashboard.jsx
+12:46:51 AM [vite] (client) hmr update /src/index.css, /src/pages/Profile.jsx
+12:47:45 AM [vite] (client) hmr update /src/index.css, /src/pages/Dashboard.jsx
+12:47:52 AM [vite] (client) hmr update /src/index.css, /src/pages/Dashboard.jsx
+12:48:47 AM [vite] (client) hmr update /src/index.css, /src/pages/Profile.jsx
+12:48:54 AM [vite] (client) hmr update /src/index.css, /src/pages/Profile.jsx
+12:49:01 AM [vite] (client) hmr update /src/index.css, /src/pages/Profile.jsx
+12:49:18 AM [vite] (client) hmr update /src/index.css, /src/pages/Profile.jsx
+12:49:21 AM [vite] (client) hmr update /src/index.css, /src/components/EditProfileModal.jsx
+12:52:19 AM [vite] (client) [optimizer] bundling dependencies...
+12:52:21 AM [vite] (client) ✨ new dependencies optimized: socket.io-client
+12:52:21 AM [vite] (client) ✨ optimized dependencies changed. reloading
+12:55:07 AM [vite] (client) hmr update /src/App.jsx, /src/index.css
+12:55:12 AM [vite] (client) hmr update /src/index.css, /src/pages/Dashboard.jsx
+12:55:23 AM [vite] (client) hmr update /src/index.css, /src/components/Navbar.jsx
+1:11:23 AM [vite] (client) hmr update /src/index.css, /src/components/Navbar.jsx
+1:13:44 AM [vite] (client) hmr update /src/index.css, /src/components/PostItem.jsx
+1:13:56 AM [vite] (client) hmr update /src/index.css, /src/components/PostItem.jsx
+1:14:05 AM [vite] (client) hmr update /src/index.css, /src/components/PostItem.jsx
+1:15:05 AM [vite] (client) hmr update /src/index.css, /src/pages/Profile.jsx
+1:15:20 AM [vite] (client) hmr update /src/index.css, /src/pages/Profile.jsx
+1:16:05 AM [vite] (client) hmr update /src/index.css, /src/pages/Profile.jsx
+1:21:29 AM [vite] (client) hmr update /src/App.jsx, /src/index.css
+1:22:07 AM [vite] (client) hmr update /src/index.css, /src/pages/Dashboard.jsx
+1:23:01 AM [vite] (client) hmr update /src/index.css, /src/pages/Profile.jsx
+1:39:57 AM [vite] (client) hmr update /src/index.css, /src/components/NotificationBell.jsx
+1:40:19 AM [vite] (client) hmr update /src/index.css, /src/components/NotificationBell.jsx
+1:40:25 AM [vite] (client) hmr update /src/index.css, /src/components/NotificationBell.jsx
+1:41:33 AM [vite] (client) hmr update /src/index.css, /src/components/CreatePost.jsx
+1:42:17 AM [vite] (client) hmr update /src/index.css, /src/components/CreatePost.jsx
+1:44:09 AM [vite] (client) hmr update /src/index.css, /src/pages/Profile.jsx
+1:44:16 AM [vite] (client) hmr update /src/index.css, /src/pages/Profile.jsx
+1:45:56 AM [vite] (client) hmr update /src/index.css, /src/pages/Profile.jsx
+1:48:09 AM [vite] (client) hmr update /src/App.jsx, /src/index.css
+1:48:29 AM [vite] (client) hmr update /src/App.jsx, /src/index.css
+1:52:54 AM [vite] (client) hmr update /src/index.css, /src/components/AutocompleteProfileCard.jsx
+1:53:21 AM [vite] (client) hmr update /src/pages/ProfileAbout.jsx, /src/index.css
+2:10:25 AM [vite] (client) hmr update /src/index.css, /src/pages/Profile.jsx

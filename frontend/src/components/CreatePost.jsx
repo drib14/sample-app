@@ -7,7 +7,15 @@ import Avatar from './Avatar';
 import ModalWrapper from './ModalWrapper';
 import MentionsTextarea from './MentionsTextarea';
 
-const feelings = ['Happy', 'Sad', 'Excited', 'Angry', 'Loved', 'Crazy', 'Blessed', 'Tired', 'Chill'];
+const feelingsData = [
+  { name: 'Happy', icon: 'https://cdn.lordicon.com/lupuorrc.json' },
+  { name: 'Sad', icon: 'https://cdn.lordicon.com/dxjqoygy.json' },
+  { name: 'Excited', icon: 'https://cdn.lordicon.com/tqywkdte.json' },
+  { name: 'Loved', icon: 'https://cdn.lordicon.com/pnhskdce.json' },
+  { name: 'Celebrating', icon: 'https://cdn.lordicon.com/lupuorrc.json' },
+  { name: 'Traveling', icon: 'https://cdn.lordicon.com/tdrtiskw.json' },
+  { name: 'Eating', icon: 'https://cdn.lordicon.com/tqywkdte.json' } // Add more specific ones if desired
+];
 
 const CreatePost = ({ user, onPostCreated }) => {
   const [content, setContent] = useState('');
@@ -300,17 +308,28 @@ const CreatePost = ({ user, onPostCreated }) => {
 
       {/* Modals */}
       <ModalWrapper isOpen={activeModal === 'feeling'} onClose={() => setActiveModal(null)} title="How are you feeling?">
-        <div className="p-4 grid grid-cols-2 gap-2">
-          {feelings.map(f => (
+        <div className="p-4 grid grid-cols-2 gap-3 max-h-96 overflow-y-auto">
+          {feelingsData.map(f => (
             <button
-              key={f}
-              onClick={() => { setFeeling(f); setActiveModal(null); }}
-              className={`p-3 rounded-xl border ${feeling === f ? 'bg-brown-100 border-brown-300 font-bold' : 'bg-white border-brown-100 hover:bg-brown-50'} text-brown-800 transition-colors text-center`}
+              key={f.name}
+              onClick={() => { setFeeling(f.name); setActiveModal(null); }}
+              className={`p-3 rounded-xl border flex items-center justify-center gap-3 ${feeling === f.name ? 'bg-brown-100 border-brown-300 font-bold' : 'bg-white border-brown-100 hover:bg-brown-50'} text-brown-800 transition-colors text-center`}
             >
-              {f}
+              <lord-icon
+                src={f.icon}
+                trigger="hover"
+                colors="primary:#a18072,secondary:#43302b"
+                style={{ width: '30px', height: '30px' }}
+              ></lord-icon>
+              <span>{f.name}</span>
             </button>
           ))}
         </div>
+        {feeling && (
+           <div className="px-4 pb-4">
+               <button onClick={() => { setFeeling(''); setActiveModal(null); }} className="w-full py-2 text-sm text-red-500 hover:bg-red-50 rounded-lg">Clear Feeling</button>
+           </div>
+        )}
       </ModalWrapper>
 
       <ModalWrapper isOpen={activeModal === 'location'} onClose={() => setActiveModal(null)} title="Search Location">

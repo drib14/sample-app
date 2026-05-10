@@ -6,8 +6,15 @@ import Login from './pages/Login';
 import Locked from './pages/Locked';
 import Dashboard from './pages/Dashboard';
 import Profile from './pages/Profile';
+import ProfileAbout from './pages/ProfileAbout';
+import SavedPosts from './pages/SavedPosts';
+import SinglePost from './pages/SinglePost';
+import NotFound from './pages/NotFound';
 
 function App() {
+  // Let the connection logic be handled inside Dashboard and Profile
+  // where we can watch user state changes upon successful login
+
   return (
     <>
       <ToastContainer
@@ -36,7 +43,12 @@ function App() {
           <Route path="/locked" element={<Locked />} />
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/profile/:username" element={<Profile />} />
+          <Route path="/profile/:username/about" element={<ProfileAbout />} />
+          <Route path="/saved" element={<SavedPosts />} />
+          <Route path="/post/:id" element={<SinglePost />} />
+          <Route path="/not-found" element={<NotFound />} />
           <Route path="/" element={<Login />} />
+          <Route path="*" element={<NotFound />} />
         </Routes>
       </Router>
     </>

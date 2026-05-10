@@ -1,5 +1,7 @@
 const Comment = require('../models/Comment');
 const Post = require('../models/Post');
+const Notification = require('../models/Notification');
+const socket = require('../socket');
 
 const createComment = async (req, res) => {
   try {
@@ -22,6 +24,51 @@ const createComment = async (req, res) => {
     const populatedComment = await Comment.findById(newComment._id)
       .populate('author', 'firstName lastName username profilePicture')
       .populate('reactions.user', 'firstName lastName profilePicture username');
+
+    if (post.author.toString() !== req.user.id) {
+      const notification = new Notification({
+        recipient: post.author,
+        sender: req.user.id,
+        type: 'comment',
+        post: postId
+      });
+      await notification.save();
+      const popNotif = await Notification.findById(notification._id)
+        .populate('sender', 'firstName lastName username profilePicture')
+        .populate('post', 'content');
+      try {
+        socket.getIO().to(post.author.toString()).emit('new_notification', popNotif);
+      } catch (e) {
+        console.log('Socket error', e);
+      }
+    }
+
+    // Mention parsing for comments (basic regex match)
+    const User = require('../models/User');
+    const mentions = content ? content.match(/@\w+/g) : [];
+    if (mentions) {
+      for (const mention of mentions) {
+        const username = mention.slice(1);
+        const mentionedUser = await User.findOne({ username });
+        if (mentionedUser && mentionedUser._id.toString() !== req.user.id) {
+           const mentionNotification = new Notification({
+              recipient: mentionedUser._id,
+              sender: req.user.id,
+              type: 'mention',
+              post: postId
+           });
+           await mentionNotification.save();
+           const popNotif = await Notification.findById(mentionNotification._id)
+            .populate('sender', 'firstName lastName username profilePicture')
+            .populate('post', 'content');
+           try {
+             socket.getIO().to(mentionedUser._id.toString()).emit('new_notification', popNotif);
+           } catch (e) {
+             console.log('Socket error', e);
+           }
+        }
+      }
+    }
 
     res.status(201).json(populatedComment);
   } catch (error) {
