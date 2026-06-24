@@ -9,14 +9,28 @@ import Profile from './pages/Profile';
 import ProfileAbout from './pages/ProfileAbout';
 import SavedPosts from './pages/SavedPosts';
 import SinglePost from './pages/SinglePost';
+import Messages from './pages/Messages';
 import NotFound from './pages/NotFound';
+import { ChatProvider, useChat } from './context/ChatContext';
+import MiniChatBox from './components/MiniChatBox';
+
+const MiniChatContainer = () => {
+  const { activeMiniChats } = useChat();
+  return (
+    <>
+      {activeMiniChats.map((conv, index) => (
+        <MiniChatBox key={conv._id} conversation={conv} positionIndex={index} />
+      ))}
+    </>
+  );
+};
 
 function App() {
   // Let the connection logic be handled inside Dashboard and Profile
   // where we can watch user state changes upon successful login
 
   return (
-    <>
+    <ChatProvider>
       <ToastContainer
         position="top-center"
         autoClose={3000}
@@ -46,12 +60,14 @@ function App() {
           <Route path="/profile/:username/about" element={<ProfileAbout />} />
           <Route path="/saved" element={<SavedPosts />} />
           <Route path="/post/:id" element={<SinglePost />} />
+          <Route path="/messages" element={<Messages />} />
           <Route path="/not-found" element={<NotFound />} />
           <Route path="/" element={<Login />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
+        <MiniChatContainer />
       </Router>
-    </>
+    </ChatProvider>
   );
 }
 

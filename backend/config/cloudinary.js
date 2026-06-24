@@ -16,10 +16,23 @@ const storage = new CloudinaryStorage({
   },
 });
 
+const messageStorage = new CloudinaryStorage({
+  cloudinary: cloudinary,
+  params: {
+    folder: 'maki_messages',
+    resource_type: 'auto', // allows image, video, raw files
+  },
+});
+
 // Max 20MB per file
 const upload = multer({
   storage: storage,
   limits: { fileSize: 20 * 1024 * 1024 }
 });
 
-module.exports = { cloudinary, upload };
+const messageUpload = multer({
+  storage: messageStorage,
+  limits: { fileSize: 20 * 1024 * 1024 }
+});
+
+module.exports = { cloudinary, upload, messageUpload };

@@ -1,4 +1,5 @@
 const { Server } = require('socket.io');
+const jwt = require('jsonwebtoken');
 const User = require('./models/User');
 
 let io;
@@ -12,24 +13,55 @@ module.exports = {
       }
     });
 
-    io.on('connection', (socket) => {
-      console.log('Client connected:', socket.id);
-      let currentUserId = null;
+    // JWT authentication middleware for sockets
+    io.use((socket, next) => {
+      const token = socket.handshake.auth.token;
+      if (!token) {
+        return next(new Error('Authentication error: No token'));
+      }
+      try {
+        const decoded = jwt.verify(token, process.env.JWT_SECRET);
+        socket.user = decoded;
+        next();
+      } catch (err) {
+        return next(new Error('Authentication error: Invalid token'));
+      }
+    });
 
-      // For a more secure app, we should decode the jwt token passed during connection
-      // For now, to solve CastError artifacts when ID is mock ("user123"), validate the ID
-      socket.on('join_user_room', async (userId) => {
-        if (!userId || userId.length !== 24) return;
+    io.on('connection', async (socket) => {
+      console.log('Client connected:', socket.id, 'User:', socket.user.id);
+      const currentUserId = socket.user.id;
 
-        socket.join(userId);
-        currentUserId = userId;
-        console.log(`User ${userId} joined their room`);
+      // Automatically join personal room using authenticated user ID
+      socket.join(currentUserId);
+      console.log(`User ${currentUserId} joined their room`);
 
+      try {
+        await User.findByIdAndUpdate(currentUserId, { isOnline: true });
+        io.emit('user_status_change', { userId: currentUserId, isOnline: true });
+      } catch (e) {
+        console.error('Error setting user online status', e);
+      }
+
+      // Chat Events
+      socket.on('typing', ({ conversationId, recipientId }) => {
+        io.to(recipientId).emit('typing', { conversationId, userId: currentUserId });
+      });
+
+      socket.on('stop_typing', ({ conversationId, recipientId }) => {
+        io.to(recipientId).emit('stop_typing', { conversationId, userId: currentUserId });
+      });
+
+      socket.on('message_delivered', async ({ messageId, senderId, conversationId }) => {
+        // Find message and update if needed, but since we are just passing events,
+        // we emit to sender that the message was delivered.
+        // In a real DB we might want to update Message.findByIdAndUpdate(messageId, { status: 'delivered' })
         try {
-          await User.findByIdAndUpdate(userId, { isOnline: true });
-          io.emit('user_status_change', { userId, isOnline: true });
+          const Message = require('./models/Message');
+          await Message.findByIdAndUpdate(messageId, { status: 'delivered' });
+          io.to(senderId).emit('message_delivered_ack', { messageId, conversationId });
         } catch (e) {
-          console.error('Error setting user online status', e);
+          console.error(e);
         }
       });
 

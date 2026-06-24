@@ -52,6 +52,7 @@ const commentRoutes = require('./routes/commentRoutes');
 const userRoutes = require('./routes/userRoutes');
 const notificationRoutes = require('./routes/notificationRoutes');
 const connectionRoutes = require('./routes/connectionRoutes');
+const messageRoutes = require('./routes/messageRoutes');
 
 app.use('/api/auth', authRoutes);
 app.use('/api/posts', postRoutes);
@@ -59,6 +60,7 @@ app.use('/api/comments', commentRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/notifications', notificationRoutes);
 app.use('/api/connections', connectionRoutes);
+app.use('/api/messages', messageRoutes);
 
 // Root Route
 app.get('/', (req, res) => {
